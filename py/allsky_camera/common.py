@@ -22,7 +22,9 @@ def ac_params():
         camera setups.
 
     """
-    
+
+    # may want to include astrometric solution parameters here as well
+
     par = {'nx': 1600,
            'ny': 1200,
            'bitpix': 8,
