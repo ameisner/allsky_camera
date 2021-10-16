@@ -1,6 +1,6 @@
 """
 allsky_camera.common
-==============
+====================
 
 Central location for parameters expected to be used in
 various other places throughout the codebase.
