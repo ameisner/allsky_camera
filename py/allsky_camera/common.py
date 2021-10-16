@@ -29,6 +29,7 @@ def ac_params():
            'ny': 1200,
            'bitpix': 8,
            'meta_env_var': 'ALLSKY_CAMERA_META',
-           'raw_satur_val': 255}
+           'raw_satur_val': 255,
+           'exptime_card': 'EXPOSURE'}
 
     return par

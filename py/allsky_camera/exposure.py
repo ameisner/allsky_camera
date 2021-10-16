@@ -21,6 +21,8 @@ class AC_exposure:
     def __init__(self, fname_im):
         im, h = util.load_exposure_image(fname_im)
 
+        util.check_image_dimensions(im)
+
         # image file name
         self.fname_im = fname_im
 
@@ -29,3 +31,8 @@ class AC_exposure:
 
         # image header
         self.header = h
+
+        # exposure time in seconds
+        self.time_seconds = util.get_exptime(self.header)
+
+        self.is_detrended = False
