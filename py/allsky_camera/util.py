@@ -10,6 +10,8 @@ import astropy.io.fits as fits
 import allsky_camera.common as common
 import allsky_camera.io as io
 import allsky_camera.analysis.djs_maskinterp as djs_maskinterp
+import astropy.stats as stats
+import numpy as np
 
 def load_exposure_image(fname):
     """
@@ -128,6 +130,38 @@ def ac_maskinterp(im):
 
     return result
 
+def subtract_dark_bias(im):
+    """
+    Use a non-illuminated region to subtract the sum of dark current and bias.
+
+    Parameters
+    ----------
+        im : numpy.ndarray
+            Image from which to subtract the bias/dark. Should be
+            of type float rather than int.
+    Returns
+    -------
+        im : numpy.ndarray
+            Modified version of input image with bias/dark subtracted.
+
+    Notes
+    -----
+        For now just subtract an overall scalar offset; would be nice to explore
+        more sophisticated options in the future. Uses sigma clipped mean
+        with outlier rejection threshold of 3 sigma.
+    """
+
+    print('Attempting to subtract dark/bias level using off region...')
+
+    dark_bias_values = np.ravel(im[1075:1200, 1450:1600])
+
+    mean, median, stddev = stats.sigma_clipped_stats(dark_bias_values,
+                                                     sigma=3.0)
+
+    im -= mean
+
+    return im
+
 def detrend_ac(exp):
     """
     Driver for pixel-level detrending.
@@ -150,7 +184,7 @@ def detrend_ac(exp):
 
     im = exp.raw_image.astype('float32')
 
-    # need to subtract dark current and bias here !!
+    im = subtract_dark_bias(im)
 
     # interpolate over static bad pixel mask
     im = ac_maskinterp(im)
