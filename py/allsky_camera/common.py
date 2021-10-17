@@ -30,6 +30,7 @@ def ac_params():
            'bitpix': 8,
            'meta_env_var': 'ALLSKY_CAMERA_META',
            'raw_satur_val': 255,
-           'exptime_card': 'EXPOSURE'}
+           'exptime_card': 'EXPOSURE',
+           'static_mask_filename': 'static_badpix_mask.fits.gz'}
 
     return par
