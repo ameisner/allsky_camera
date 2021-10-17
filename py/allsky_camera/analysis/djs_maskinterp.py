@@ -75,6 +75,36 @@ def maskinterp(yval, mask, axis):
     return yval
 
 def average_bilinear(yval, mask):
+    """
+    Interpolate separately along the x and y directions, then take the mean.
+
+    Parameters
+    ----------
+        yval : np.ndarray
+            2D image, pixel values should be float not int data type
+        mask : np.ndarray
+            2D mask image, should have same dimensions as yval, should have
+            an integer data type.
+            Nonzero values mark pixels that will be interpolated over.
+
+    Returns
+    -------
+        interp : np.ndarray
+            2D image, same dimensions as yval and mask, should be the
+            same as yval except for pixel locations with nonzero values in
+            mask, which have been interpolated over
+
+    Notes
+    -----
+        Meant to be the equivalent of the following common pattern
+        using djs_maskinterp.pro in IDL:
+
+            intx = djs_maskinterp(yval, mask, iaxis=0, /const)
+            inty = djs_maskinterp(yval, mask, iaxis=1, /const)
+
+            interp = (intx + inty)/2.0
+    """
+
     int0 = maskinterp(yval, mask, 0)
     int1 = maskinterp(yval, mask, 1)
     interp = (int0 + int1)/2.0
