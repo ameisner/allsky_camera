@@ -41,6 +41,27 @@ def maskinterp1(yval, mask):
     return ynew
 
 def maskinterp(yval, mask, axis):
+    """
+    Linearly interpolate along one axis over masked pixel locations.
+
+    Parameters
+    ----------
+        yval : numpy.ndarray
+            2D image, pixel values should be float not int data type
+        mask : numpy.ndarray
+            2D mask image, should have same dimensions as yval, should have
+            an integer data type.
+            Nonzero values mark pixels that will be interpolated over.
+        axis : int
+            Axis along which to interpolate, should be either 0 or 1
+
+    Returns
+    -------
+        yval : numpy.ndarray
+            Version of input yval 2D image where pixel locations with
+            nonzero mask values have been interpolated over along one
+            dimension.
+    """
 
     mask = mask.astype(int)
 
