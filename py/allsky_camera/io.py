@@ -30,6 +30,21 @@ def load_static_badpix():
     return mask
 
 def write_image_level_outputs(exp, outdir):
+    """
+    Write image level outputs, such as the detrended all-sky camera image.
+
+    Parameters
+    ----------
+        exp    : allsky_camera.exposure.AC_exposure
+                 All-sky camera exposure object.
+        outdir : str
+                 Full path of output directory.
+
+    Notes
+    -----
+        Currently this only writes out a detrended image. Perhaps in the future
+        there could also be an image-level bitmask written out.
+    """
 
     print('Attempting to write image level outputs')
 
