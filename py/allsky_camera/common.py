@@ -31,6 +31,10 @@ def ac_params():
            'meta_env_var': 'ALLSKY_CAMERA_META',
            'raw_satur_val': 255,
            'exptime_card': 'EXPOSURE',
-           'static_mask_filename': 'static_badpix_mask.fits.gz'}
+           'static_mask_filename': 'static_badpix_mask.fits.gz',
+           'off_region_xmin': 1450,
+           'off_region_xmax': 1600,
+           'off_region_ymin': 1075,
+           'off_region_ymax': 1200}
 
     return par

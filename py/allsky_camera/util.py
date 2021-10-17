@@ -153,7 +153,15 @@ def subtract_dark_bias(im):
 
     print('Attempting to subtract dark/bias level using off region...')
 
-    dark_bias_values = np.ravel(im[1075:1200, 1450:1600])
+    par = common.ac_params()
+
+    x_l = par['off_region_xmin']
+    x_u = par['off_region_xmax']
+
+    y_l = par['off_region_ymin']
+    y_u = par['off_region_ymax']
+
+    dark_bias_values = np.ravel(im[y_l:y_u, x_l:x_u])
 
     mean, median, stddev = stats.sigma_clipped_stats(dark_bias_values,
                                                      sigma=3.0)
