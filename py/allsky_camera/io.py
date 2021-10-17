@@ -28,3 +28,24 @@ def load_static_badpix():
     mask = fits.getdata(fname)
 
     return mask
+
+def write_image_level_outputs(exp, outdir):
+
+    print('Attempting to write image level outputs')
+
+    assert(os.path.exists(outdir))
+
+    outname = (os.path.split(exp.fname_im))[-1]
+
+    outname = outname.replace('.fits', '-detrended.fits')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    hdu = fits.PrimaryHDU(exp.detrended.astype('float32'), header=exp.header)
+    hdu.writeto(outname_tmp)
+    os.rename(outname_tmp, outname)

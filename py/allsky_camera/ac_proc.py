@@ -13,6 +13,7 @@ import time
 import os
 from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
+import allsky_camera.io as io
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None):
@@ -57,6 +58,10 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     # pixel-level detrending
     util.detrend_ac(exp)
+
+    if write_outputs:
+        if not dont_write_detrended:
+            io.write_image_level_outputs(exp, outdir)
 
     dt = time.time()-t0
 
