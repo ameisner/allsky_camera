@@ -55,6 +55,11 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     exp = AC_exposure(fname_in)
 
     dt = time.time()-t0
+
+    print('all-sky camera reduction pipeline took ' + '{:.2f}'.format(dt) +
+          ' seconds')
+    print('all-sky camera reduction pipeline completed at: ' +
+          str(datetime.utcnow()) + ' UTC')
     
 if __name__ == "__main__":
     descr = 'run the all-sky camera reduction pipeline on an exposure'
