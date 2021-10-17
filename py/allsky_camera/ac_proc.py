@@ -12,6 +12,7 @@ from datetime import datetime
 import time
 import os
 from allsky_camera.exposure import AC_exposure
+import allsky_camera.util as util
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None):
@@ -53,6 +54,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     assert(os.path.exists(fname_in))
 
     exp = AC_exposure(fname_in)
+
+    # pixel-level detrending
+    util.detrend_ac(exp)
 
     dt = time.time()-t0
 

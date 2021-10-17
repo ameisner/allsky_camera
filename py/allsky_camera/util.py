@@ -8,6 +8,8 @@ A collection of all-sky camera related utility functions.
 import os
 import astropy.io.fits as fits
 import allsky_camera.common as common
+import allsky_camera.io as io
+import allsky_camera.analysis.djs_maskinterp as djs_maskinterp
 
 def load_exposure_image(fname):
     """
@@ -99,3 +101,62 @@ def check_image_dimensions(image):
     assert(sh[1] == par['nx'])
 
     print('Raw all-sky image has correct dimensions')
+
+def ac_maskinterp(im):
+    """
+    Interpolate over static bad pixels.
+
+    Parameters
+    ----------
+        im : numpy.ndarray
+            Image that will have some of its pixels interpolated over.
+
+    Returns
+    -------
+        result : numpy.ndarray
+            Version of the input image with static bad locations
+            interpolated over.
+    """
+
+    # check that im is type float32
+
+    print('Attempting to interpolate over the static bad pixel mask')
+
+    mask = io.load_static_badpix()
+
+    result = djs_maskinterp.average_bilinear(im, (mask != 0))
+
+    return result
+
+def detrend_ac(exp):
+    """
+    Driver for pixel-level detrending.
+
+    Parameters
+    ----------
+        exp : allsky_camera.exposure.AC_exposure
+            All-sky camera exposure object.
+
+    Notes
+    -----
+        Does not return anything, but modifies the state of the input
+        all-sky camera exposure object.
+
+    """
+
+    print('Attempting to detrend the raw all-sky camera image')
+
+    assert(not exp.detrended)
+
+    im = exp.raw_image.astype('float32')
+
+    # need to subtract dark current and bias here !!
+
+    # interpolate over static bad pixel mask
+    im = ac_maskinterp(im)
+
+    exp.is_detrended = True
+
+    exp.detrended = im
+
+    print('Finished detrending the raw all-sky camera image')
