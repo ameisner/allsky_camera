@@ -1,3 +1,10 @@
+"""
+allsky_camera.analysis.djs_maskinterp
+=====================================
+
+Meant to be a Python port of djs_maskinterp.pro from IDLUTILS.
+"""
+
 import numpy as np
 from scipy.interpolate import interp1d
 import astropy.io.fits as fits
