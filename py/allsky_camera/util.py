@@ -232,12 +232,13 @@ def get_starting_mjd(header):
     card = 'DATE-OBS'
     assert(card in header)
 
+    par = common.ac_params()
+
     # DATE-OBS is actually UTC-7, whereas pandas.Timestamp assumes UTC
     # so we need to correct for this later
     ts = pd.Timestamp(header['DATE-OBS'])
 
-    jd_minus_mjd = 2400000.5
-    mjd = ts.to_julian_date() - jd_minus_mjd
+    mjd = ts.to_julian_date() - par['jd_minus_mjd']
 
     utc_offs_hours = 7.0
     hours_per_day = 24.0
