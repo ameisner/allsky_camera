@@ -12,6 +12,7 @@ import allsky_camera.io as io
 import allsky_camera.analysis.djs_maskinterp as djs_maskinterp
 import astropy.stats as stats
 import numpy as np
+import pandas as pd
 
 def load_exposure_image(fname):
     """
@@ -202,3 +203,49 @@ def detrend_ac(exp):
     exp.detrended = im
 
     print('Finished detrending the raw all-sky camera image')
+
+def get_starting_mjd(header):
+    """
+    Determine MJD of start of all-sky camera exposure based on the raw header.
+
+    Parameters
+    ----------
+        header : astropy.io.fits.header.Header
+            astropy FITS image header ojbect
+
+    Returns
+    -------
+        mjd : float
+            MJD at start of all-sky camera exposure
+
+    Notes
+    -----
+        Given the large pixel size, this MJD doesn't need to be calculated
+        with particularly high precision.
+
+        Uses DATE-OBS header card and assumes that DATE-OBS is the
+        local time at KPNO (UTC-7). DATE-OBS expected to be something like
+        2020-10-11T21:37:14.72
+
+    """
+
+    card = 'DATE-OBS'
+    assert(card in header)
+
+    # DATE-OBS is actually UTC-7, whereas pandas.Timestamp assumes UTC
+    # so we need to correct for this later
+    ts = pd.Timestamp(header['DATE-OBS'])
+
+    jd_minus_mjd = 2400000.5
+    mjd = ts.to_julian_date() - jd_minus_mjd
+
+    utc_offs_hours = 7.0
+    hours_per_day = 24.0
+
+    # MJD is actually 7 hours later than value returned when using
+    # the KPNO local timestamp in place of the UTC timestamp (as was
+    # done when instantiating the astropy.Time object)
+
+    mjd += utc_offs_hours/hours_per_day
+
+    return mjd
