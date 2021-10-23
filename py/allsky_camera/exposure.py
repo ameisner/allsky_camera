@@ -38,3 +38,5 @@ class AC_exposure:
         self.is_detrended = False
 
         self.detrended = None
+
+        self.mjd = util.get_starting_mjd(self.header)
