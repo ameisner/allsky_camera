@@ -38,6 +38,10 @@ def ac_params():
            'off_region_ymax': 1200,
            'jd_minus_mjd' : 2400000.5,
            'bsc_filename' : 'bsc5.fits',
-           'bsc_filename_csv' : 'bsc5.csv'}
+           'bsc_filename_csv' : 'bsc5.csv',
+           'kpno_lon' : -111.5997,
+           'kpno_lat' : 31.9599,
+           'kpno_elev_meters' : 2100.0,
+           'pressure_bars' : 1.013}
 
     return par

@@ -11,6 +11,7 @@ import allsky_camera.io as io
 from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import astropy.units as u
+import allsky_camera.common as common
 
 class StarCat:
     """
@@ -46,10 +47,14 @@ class StarCat:
             Assumes the observer is at KPNO. MJD assumed to be scalar for now.
 
         """
+
+        par = common.ac_params()
+
         obstime = Time(str(mjd), format='mjd')
 
-        location = EarthLocation(lat=31.9599*u.deg, lon=-111.5997*u.deg,
-                                 height=2100.0*u.m)
+        location = EarthLocation(lat=par['kpno_lat']*u.deg,
+                                 lon=par['kpno_lon']*u.deg,
+                                 height=par['kpno_elev_meters']*u.m)
 
         coords = SkyCoord(self.catalog['RA']*u.deg, self.catalog['DEC']*u.deg)
 
@@ -57,7 +62,7 @@ class StarCat:
         # pressure is needed to account for atmospheric refraction,
         # to match default behavior of IDL eq2hor
         altaz = coords.transform_to(AltAz(obstime=obstime, location=location,
-                                          pressure=1.013*u.bar))
+                                          pressure=par['pressure_bars']*u.bar))
 
         return altaz
 
