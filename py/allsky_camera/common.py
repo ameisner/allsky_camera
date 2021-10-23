@@ -37,6 +37,7 @@ def ac_params():
            'off_region_ymin': 1075,
            'off_region_ymax': 1200,
            'jd_minus_mjd' : 2400000.5,
-           'bsc_filename' : 'bsc5.fits'}
+           'bsc_filename' : 'bsc5.fits',
+           'bsc_filename_csv' : 'bsc5.csv'}
 
     return par
