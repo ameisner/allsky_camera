@@ -8,6 +8,7 @@ I/O functions for all-sky camera reduction pipeline.
 import astropy.io.fits as fits
 import allsky_camera.common as common
 import os
+import pandas as pd
 
 def load_static_badpix():
     """
@@ -28,6 +29,30 @@ def load_static_badpix():
     mask = fits.getdata(fname)
 
     return mask
+
+def load_bsc():
+    """
+    Load BSC5 catalog.
+
+    Returns
+    -------
+        df : pandas.core.frame.DataFrame
+            BSC5 catalog as a pandas dataframe, sorted by Dec (low to high)
+    """
+
+    par = common.ac_params()
+
+    fname = os.path.join(os.environ[par['meta_env_var']],
+                     par['bsc_filename_csv'])
+
+    assert(os.path.exists(fname))
+
+    df = pd.read_csv(fname)
+
+    # sort by Dec in case this comes in useful for binary searching later on
+    df.sort_values('DEC', inplace=True, ignore_index=True)
+
+    return df
 
 def write_image_level_outputs(exp, outdir):
     """
