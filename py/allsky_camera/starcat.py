@@ -12,6 +12,7 @@ from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import astropy.units as u
 import allsky_camera.common as common
+import copy
 
 class StarCat:
     """
@@ -66,7 +67,7 @@ class StarCat:
 
         return altaz
 
-    def cat_with_altaz(self, mjd):
+    def cat_with_altaz(self, mjd, horizon_cut=True):
         """
         Return bright star catalog with bonus (alt, az) columns.
 
@@ -74,10 +75,30 @@ class StarCat:
         ----------
             mjd - float
                 MJD (scalar) at which to compute (alt, az) as viewed from KPNO.
+            horizon_cut - bool (optional)
+                If true, downselect to the catalog rows for stars that are
+                above the horizon at the specfied MJD.
 
+        Returns
+        -------
+            result - pandas.core.frame.DataFrame
+                Version of this object's catalog with alt_deg, az_deg, mjd
+                columns added.
         Notes
         -----
             Assumes the observer is at KPNO. MJD assumed to be scalar for now.
 
         """
-        pass
+
+        altaz = self.compute_altaz(mjd)
+
+        result = copy.deepcopy(self.catalog)
+
+        result['alt_deg'] = [aa.alt.deg for aa in altaz]
+        result['az_deg'] = [aa.az.deg for aa in altaz]
+        result['mjd'] = mjd
+
+        if horizon_cut:
+            result = result[result['alt_deg'] > 0]
+
+        return result
