@@ -140,6 +140,7 @@ class StarCat:
         result = pd.concat([altaz, xy], axis=1)
 
         if in_image_cut:
-            result = result[result['y'] > 0]
+            result = result[util.in_image_mask(result['x'],
+                                               result['y'])]
 
         return result

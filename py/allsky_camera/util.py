@@ -293,3 +293,40 @@ def altaz_to_xy(alt, az):
     xy['y'] = _dy + par['y_zenith_pix']
 
     return xy
+
+def in_image_mask(x, y):
+    """
+    Return a boolean mask indicating which (x, y) pairs fall within image.
+
+    Parameters
+    ----------
+        x : numpy.ndarray
+            x pixel coordinates
+        y : numpy.ndarray
+            y pixel coordinates
+        
+
+    Returns
+    -------
+        in_image : numpy.ndarray
+            Boolean mask with same dimensions as input x (and y). True means
+            within image boundaries, false means outside of image boundaries
+
+    Notes
+    -----
+        In my convention, a 2D numpy array representing an image is indexed as
+        [y, x].
+
+    """
+
+    par = common.ac_params()
+
+    xmin = -0.5
+    xmax = par['nx'] - 0.5
+    ymin = -0.5
+    ymax = par['ny'] - 0.5
+
+    mask = (x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)
+
+    return mask
+    
