@@ -250,3 +250,46 @@ def get_starting_mjd(header):
     mjd += utc_offs_hours/hours_per_day
 
     return mjd
+
+def altaz_to_xy(alt, az):
+    """
+    Convert (altitude, azimuth) to predicted detector pixel coordinates.
+
+    Parameters
+    ----------
+        alt : numpy.ndarray
+            Altitude in degrees (apparent or true?).
+        az  : numpy.ndarray
+            Azimuth in degrees.
+
+    Returns
+    -------
+        xy : pandas.core.frame.DataFrame
+            Table of (x, y) pixel coordinates corresponding to (alt_deg, az_deg)
+            Column names are 'X' and 'Y'.
+    """
+
+    par = common.ac_params()
+
+    zd = 90.0 - alt # zenith distance in degrees
+
+    r_pix = (zd/90.0)*par['horizon_radius_pix'] + par['coeff2']*(zd**2) + \
+            par['coeff3']*(zd**3)
+
+    radeg = 180.0/np.pi
+
+    dx = -1.0*np.sin(az/radeg)*r_pix
+    dy = np.cos(az/radeg)*r_pix
+
+    # then rotate dx, dy according to rot_deg, to account for the fact
+    # that north is close to, but not precisely aligned with, the +Y axis
+
+    _dx = np.cos(par['rot_deg']/radeg)*dx - np.sin(par['rot_deg']/radeg)*dy
+    _dy = np.sin(par['rot_deg']/radeg)*dx + np.cos(par['rot_deg']/radeg)*dy
+
+    xy = pd.DataFrame()
+
+    xy['x'] = _dx + par['x_zenith_pix']
+    xy['y'] = _dy + par['y_zenith_pix']
+
+    return xy

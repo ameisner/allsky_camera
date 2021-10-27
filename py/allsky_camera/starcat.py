@@ -13,6 +13,7 @@ from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 import astropy.units as u
 import allsky_camera.common as common
 import copy
+import pandas as pd
 
 class StarCat:
     """
@@ -69,7 +70,7 @@ class StarCat:
 
     def cat_with_altaz(self, mjd, horizon_cut=True):
         """
-        Return bright star catalog with bonus (alt, az) columns.
+        Return bright star catalog with bonus (alt, az) columns at some MJD.
 
         Parameters
         ----------
@@ -100,5 +101,45 @@ class StarCat:
 
         if horizon_cut:
             result = result[result['alt_deg'] > 0]
+
+        return result
+
+    def cat_with_pixel_coords(self, mjd, horizon_cut=True, in_image_cut=True):
+        """
+        Return bright star catalog with bonus (x, y) columns at some MJD.
+
+        Parameters
+        ----------
+            mjd : float
+                MJD (scalar) at which to compute (alt, az) as viewed from KPNO.
+            horizon_cut : bool (optional)
+                If true, downselect to the catalog rows for stars that are
+                above the horizon at the specfied MJD.
+            in_image_cut : bool (optional)
+                If true, downselect to the catalog rows for stars that are
+                within the image boundaries. For the MDM camera, there is a
+                southern region where stars can be above the horizon but
+                fall off of the bottom edge of the image.
+
+        Returns
+        -------
+            result - pandas.core.frame.DataFrame
+                Version of this object's catalog with alt_deg, az_deg, mjd,
+                x, y columns added.
+
+        Notes
+        -----
+            Assumes the observer is at KPNO. MJD assumed to be scalar for now.
+
+        """
+
+        altaz = self.cat_with_altaz(mjd, horizon_cut=horizon_cut)
+
+        xy = util.altaz_to_xy(altaz['alt_deg'], altaz['az_deg'])
+
+        result = pd.concat([altaz, xy], axis=1)
+
+        if in_image_cut:
+            result = result[result['y'] > 0]
 
         return result

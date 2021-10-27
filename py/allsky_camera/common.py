@@ -35,7 +35,13 @@ def ac_params():
                   'off_region_xmin': 1450,
                   'off_region_xmax': 1600,
                   'off_region_ymin': 1075,
-                  'off_region_ymax': 1200}
+                  'off_region_ymax': 1200,
+                  'x_zenith_pix' :  802.37891,
+                  'y_zenith_pix' : 511.35899,
+                  'rot_deg' : 3.5506619,
+                  'coeff2' : 0.0048194290,
+                  'coeff3' : -4.3659004e-5,
+                  'horizon_radius_pix' : 626.05372}
 
     # miscellaneous parameters not tied to a particular camera
     par_misc = {'meta_env_var': 'ALLSKY_CAMERA_META',
