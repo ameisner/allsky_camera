@@ -304,7 +304,6 @@ def in_image_mask(x, y):
             x pixel coordinates
         y : numpy.ndarray
             y pixel coordinates
-        
 
     Returns
     -------
@@ -330,3 +329,37 @@ def in_image_mask(x, y):
 
     return mask
     
+def min_edge_dist_pix(x, y):
+    """
+    Compute minimum distance to any image edge
+
+
+    Parameters
+    ----------
+        x : numpy.ndarray
+            x pixel coordinates. Needs to have the same size as y.
+        y : numpy.ndarray
+            y pixel coordinates. Needs to have the same size as x.
+
+    Returns
+    -------
+        min_edge_dist : numpy.ndarray
+            For each (x, y) pair, the minimum distance to any image edge.
+
+    Notes
+    -----
+        Works for array-valued x, y. Edge is taken to be outer edge of
+        the boundary pixel, with a convention that the center of a pixel
+        has integer (x, y) coordinates and zero-indexed indexing.
+
+    """
+
+    min_edge_dist = 20000
+
+    par = common.ac_params()
+
+    min_edge_dist = np.minimum(x + 0.5, y + 0.5)
+    min_edge_dist = np.minimum(min_edge_dist, par['nx'] - 0.5 - x)
+    min_edge_dist = np.minimum(min_edge_dist, par['ny'] - 0.5 - y)
+
+    return min_edge_dist
