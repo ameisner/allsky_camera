@@ -422,3 +422,33 @@ def ac_recentroid(_im, x, y):
     result['centroid_shift_flag'] = (np.abs(result['x_shift']) > cmaxshift) | (np.abs(result['y_shift']) > cmaxshift) | (qmaxshift != 0)
 
     return result
+
+def zenith_radius_pix(x_pix, y_pix):
+    """
+    Compute distance in pixels of a detector location relative to zenith.
+
+    Parameters
+    ----------
+        x_pix : numpy.ndarray
+            x pixel locations. Needs to have the same dimensions as y_pix.
+        y_pix : numpy.ndarray
+            y pixel locations. Needs to have the same dimensions as x_pix.
+
+    Returns
+    -------
+        radius_pix : numpy.ndarray
+            Radius in pixels of the (x_pix, y_pix) locations on the 
+            detector relative to the nominal zenith.
+
+    """
+
+    assert(x_pix.shape == y_pix.shape)
+
+    par = common.ac_params()
+
+    dx_pix = x_pix - par['x_zenith_pix']
+    dy_pix = y_pix - par['y_zenith_pix']
+
+    radius_pix = np.sqrt(dx_pix**2 + dy_pix**2)
+
+    return radius_pix

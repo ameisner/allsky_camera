@@ -72,6 +72,14 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = pd.concat([bsc, centroids], axis=1)
 
+    bsc = bsc[bsc['qmaxshift'] == 0] # restrict to good centroids
+
+    assert(len(bsc) > 0)
+
+    r_pix = util.zenith_radius_pix(bsc['x'], bsc['y'])
+
+    bsc = bsc[r_pix <= 500] # factor out 500 special number...
+
     if write_outputs:
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
