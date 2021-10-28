@@ -68,7 +68,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     centroids = util.ac_recentroid(exp.detrended, bsc['x'], bsc['y'])
 
     assert(len(centroids) == len(bsc))
-    assert(np.sum(bsc.index != centroids.index) == 0)
+    assert(np.all(bsc.index == centroids.index))
 
     bsc = pd.concat([bsc, centroids], axis=1)
 
