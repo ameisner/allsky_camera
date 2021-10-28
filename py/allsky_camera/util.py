@@ -389,6 +389,8 @@ def ac_recentroid(_im, x, y):
 
     """
 
+    print('Refining bright star centroids')
+
     im = _im.astype(float)
 
     assert(len(x) == len(y))
