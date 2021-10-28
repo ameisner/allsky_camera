@@ -13,6 +13,8 @@ import allsky_camera.analysis.djs_maskinterp as djs_maskinterp
 import astropy.stats as stats
 import numpy as np
 import pandas as pd
+import copy
+from allsky_camera.analysis.djs_photcen import djs_photcen
 
 def load_exposure_image(fname):
     """
@@ -358,3 +360,63 @@ def in_image_mask(x, y):
     mask = min_edge_dist > 0
 
     return mask
+
+def ac_recentroid(_im, x, y):
+    """"
+    Refine centroids relative to initial guess.
+
+    Parameters
+    ----------
+        _im : numpy.ndarray
+            Detrended all-sky camera image. Should be floating point, though
+            this is also ensured within this function itself.
+
+        x : numpy.ndarray
+            List of x pixel values for initial centroid guesses.
+
+        y : numpy.ndarray
+            List of y pixel values for initial centroid guesses.
+
+    Returns
+    -------
+        result : pandas.core.frame.DataFrame
+            Columns include xcentroid, ycentroid - the refine centroids.
+
+    Notes
+    -----
+        x and y need to have the same length. In my convention, a 2D numpy 
+        array representing an image is indexed as [y, x].
+
+    """
+
+    im = _im.astype(float)
+
+    assert(len(x) == len(y))
+
+    n = len(x)
+
+    xcen = np.zeros(n, dtype=float)
+    ycen = np.zeros(n, dtype=float)
+    qmaxshift = np.zeros(n, dtype=int)
+
+    cmaxshift = 2.0
+
+    for i in range(n):
+        _xcen, _ycen, q = djs_photcen(x[i], y[i], im, cbox=4, cmaxiter=10,
+                                      cmaxshift=cmaxshift, ceps=0)
+
+        xcen[i] = _xcen
+        ycen[i] = _ycen
+        qmaxshift[i] = q
+
+    result = pd.DataFrame()
+
+    result['xcentroid'] = xcen
+    result['ycentroid'] = ycen
+    result['x_shift'] = xcen - x
+    result['y_shift'] = ycen - y
+    result['qmaxshift'] = qmaxshift
+
+    result['centroid_shift_flag'] = (np.abs(result['x_shift']) > cmaxshift) | (np.abs(result['y_shift']) > cmaxshift) | (qmaxshift != 0)
+
+    return result
