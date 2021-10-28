@@ -101,6 +101,7 @@ class StarCat:
 
         if horizon_cut:
             result = result[result['alt_deg'] > 0]
+            result.reset_index(drop=True, inplace=True)
 
         return result
 
@@ -142,5 +143,6 @@ class StarCat:
         if in_image_cut:
             result = result[util.in_image_mask(result['x'],
                                                result['y'])]
+            result.reset_index(drop=True, inplace=True)
 
         return result
