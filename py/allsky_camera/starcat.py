@@ -91,6 +91,9 @@ class StarCat:
 
         """
 
+        print('Calculating bright star catalog altitude/azimuth at ' +
+              '{:.5f}'.format(mjd))
+
         altaz = self.compute_altaz(mjd)
 
         result = copy.deepcopy(self.catalog)
@@ -133,6 +136,9 @@ class StarCat:
             Assumes the observer is at KPNO. MJD assumed to be scalar for now.
 
         """
+
+        print('Calculating bright star catalog predicted pixel coordinates' +
+              ' at ' + '{:.5f}'.format(mjd))
 
         altaz = self.cat_with_altaz(mjd, horizon_cut=horizon_cut)
 
