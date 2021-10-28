@@ -14,6 +14,9 @@ import os
 from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
+import allsky_camera.starcat as starcat
+import numpy as np
+import pandas as pd
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None):
@@ -58,6 +61,16 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     # pixel-level detrending
     util.detrend_ac(exp)
+
+    sc = starcat.StarCat()
+    bsc = sc.cat_with_pixel_coords(exp.mjd)
+
+    centroids = util.ac_recentroid(exp.detrended, bsc['x'], bsc['y'])
+
+    assert(len(centroids) == len(bsc))
+    assert(np.sum(bsc.index != centroids.index) == 0)
+
+    bsc = pd.concat([bsc, centroids], axis=1)
 
     if write_outputs:
         if not dont_write_detrended:
