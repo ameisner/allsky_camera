@@ -53,6 +53,7 @@ def ac_params():
                 'kpno_lon' : -111.5997,
                 'kpno_lat' : 31.9599,
                 'kpno_elev_meters' : 2100.0,
-                'pressure_bars' : 1.013}
+                'pressure_bars' : 1.013,
+                'iso_thresh_deg': 0.3}
 
     return dict(par_camera, **par_misc)

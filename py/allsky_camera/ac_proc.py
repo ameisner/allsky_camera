@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import allsky_camera.common as common
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None):
@@ -84,7 +85,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     assert(len(bsc) > 0)
 
-    bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > 0.3] # isolation criterion
+    par = common.ac_params()
+    # isolation criterion
+    bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > par['iso_thresh_deg']]
 
     assert(len(bsc) > 0)
 
