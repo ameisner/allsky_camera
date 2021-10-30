@@ -123,6 +123,12 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     phot = util.ac_aper_phot(exp.raw_image, bsc['xcentroid'],
                              bsc['ycentroid'])
 
+    bsc = pd.concat([bsc, phot], axis=1)
+
+    bsc = bsc[bsc['flux_adu'] > 0]
+
+    bsc.reset_index(drop=True, inplace=True)
+
     if write_outputs:
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
