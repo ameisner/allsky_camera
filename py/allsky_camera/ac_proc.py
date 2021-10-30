@@ -120,6 +120,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc.reset_index(drop=True, inplace=True)
 
+    phot = util.ac_aper_phot(exp.raw_image, bsc['xcentroid'],
+                             bsc['ycentroid'])
+
     if write_outputs:
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)

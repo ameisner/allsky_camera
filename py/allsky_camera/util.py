@@ -15,6 +15,8 @@ import numpy as np
 import pandas as pd
 import copy
 from allsky_camera.analysis.djs_photcen import djs_photcen
+from photutils import CircularAperture, CircularAnnulus, aperture_photometry
+import photutils
 
 def load_exposure_image(fname):
     """
@@ -523,3 +525,112 @@ def check_saturation(raw, x, y):
     df['satur_box'] = bad_box
 
     return df
+
+def _get_area_from_ap(ap):
+    """
+    Retrieve the area of an aperture photometry aperture.
+
+    Parameters
+    ----------
+        ap : photutils.aperture.circle.CircularAperture
+            Photutils aperture object (don't believe that it technically
+            needs to be circular though).
+
+    Returns
+    -------
+        area : float
+            Area of the aperture in image pixels.
+
+    Notes
+    -----
+        This utility exists to try and work around the photutils API change
+        between versions 0.6 and 0.7.
+
+    """
+
+    if (photutils.__version__.find('0.7') != -1) or (photutils.__version__.find('1.0') != -1):
+        area = ap.area # 0.7
+    else:
+        area = ap.area() # 0.6
+
+    return area
+
+def ac_aper_phot(_im, x, y, bg_sigclip=False):
+    """
+    Perform aperture photometry at a list of star centroid locations.
+
+    Parameters
+    ----------
+        _im : numpy.ndarray
+            2D array containing the all-sky camera image. Should be the
+            detrended image, not the raw image.
+        x   : numpy.ndarray
+            List of star centroid x coordinates. Needs to have the same
+            length as y.
+        y   : numpy.ndarray
+            List of star centroid y coordinates. Needs to have the same
+            length as x.
+        bg_sigclip : bool (optional)
+            Do sigma clipping when computing annulus background levels.
+            Default is False, which is faster.
+
+    Returns
+    -------
+        cat : pandas.core.frame.DataFrame
+            Dataframe encapsulating the photometry results.
+    """
+
+    assert(len(x) == len(y))
+
+    x = np.array(x)
+    y = np.array(y)
+
+    im = _im.astype(float)
+
+    par = common.ac_params()
+
+    positions = list(zip(x, y))
+
+    cat = pd.DataFrame() # initialize output
+
+    # will I ever use more than one aperture radius?
+
+    radii = [par['aper_phot_objrad']]
+    ann_radii = par['annulus_radii'] # should have 2 elements - inner and outer
+
+    apertures = [CircularAperture(positions, r=r) for r in radii]
+    annulus_apertures = CircularAnnulus(positions, r_in=ann_radii[0],
+                                        r_out=ann_radii[1])
+    annulus_masks = annulus_apertures.to_mask(method='center')
+
+    bkg_median = []
+    for mask in annulus_masks:
+        annulus_data = mask.multiply(im)
+        annulus_data_1d = annulus_data[mask.data > 0]
+        if bg_sigclip:
+            # this sigma_clipped_stats call is actually the slow part !!
+            _, median_sigclip, std_bg = sigma_clipped_stats(annulus_data_1d)
+            bkg_median.append(median_sigclip)
+        else:
+            bkg_median.append(np.median(annulus_data_1d))
+
+    bkg_median = np.array(bkg_median)
+    phot = aperture_photometry(im, apertures)
+
+    for i, aperture in enumerate(apertures):
+        aper_bkg_tot = bkg_median*_get_area_from_ap(aperture)
+        cat['aper_sum_bkgsub_' + str(i)] = phot['aperture_sum_' + str(i)] - aper_bkg_tot
+
+        cat['aper_bkg_' + str(i)] = aper_bkg_tot
+
+    cat['sky_annulus_area_pix'] = _get_area_from_ap(annulus_apertures)
+    cat['sky_annulus_median'] = bkg_median
+
+    flux_adu = np.zeros((len(cat), len(radii)), dtype=float)
+
+    for i in range(len(radii)):
+        flux_adu[:, i] = cat['aper_sum_bkgsub_' + str(i)]
+
+    cat['flux_adu'] = flux_adu
+
+    return cat

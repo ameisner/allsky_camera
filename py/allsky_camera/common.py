@@ -41,7 +41,9 @@ def ac_params():
                   'rot_deg' : 3.5506619,
                   'coeff2' : 0.0048194290,
                   'coeff3' : -4.3659004e-5,
-                  'horizon_radius_pix' : 626.05372}
+                  'horizon_radius_pix' : 626.05372,
+                  'aper_phot_objrad' : 2.0,
+                  'annulus_radii' : [5.0, 10.0]}
 
     # miscellaneous parameters not tied to a particular camera
     par_misc = {'meta_env_var': 'ALLSKY_CAMERA_META',
