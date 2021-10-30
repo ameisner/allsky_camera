@@ -452,3 +452,74 @@ def zenith_radius_pix(x_pix, y_pix):
     radius_pix = np.sqrt(dx_pix**2 + dy_pix**2)
 
     return radius_pix
+
+def check_saturation(raw, x, y):
+    """
+    Compute saturation flags for a list of star centroid locations.
+
+    Parameters
+    ----------
+        raw : numpy.ndarray
+            Raw all-sky camera image.
+        x   : numpy.ndarray
+            List of star centroid x coordinates. Needs to have the same
+            length as y.
+        y   : numpy.ndarray
+            List of star centroid y coordinates. Needs to have the same
+            length as x.
+
+    Returns
+    -------
+        flags : pandas.core.frame.DataFrame
+            Dataframe with columns related to labeling saturation at/near
+            each (x, y) centroid location. Number of rows equal to lenght of
+            x and y.
+
+    Notes
+    -----
+        The image passed in needs to be the truly raw image, not the
+        detrended image.
+    """
+
+    print('Computing saturation flags...')
+
+    assert(len(x) == len(y))
+    assert(len(x) > 0)
+    assert(len(raw.shape) == 2)
+
+    assert(np.sum(np.round(raw) != raw) == 0)
+
+    n = len(x)
+    x = np.array(x)
+    y = np.array(y)
+
+    par = common.ac_params()
+
+    ix = np.round(x).astype(int)
+    # + 1 accounts for Python indexing convention
+    ix_upper = np.minimum(np.maximum(ix + 1, 0), par['nx'] - 1).astype(int) + 1
+    ix_lower = np.minimum(np.maximum(ix - 1, 0), par['nx'] - 1).astype(int)
+
+    iy = np.round(y).astype(int)
+    iy_upper = np.minimum(np.maximum(iy + 1, 0), par['ny'] - 1).astype(int) + 1
+    iy_lower = np.minimum(np.maximum(iy - 1, 0), par['ny'] - 1).astype(int)
+
+    bad_centroid = np.zeros(n, dtype=int)
+
+    bad_centroid += (raw[iy, ix] == 255).astype(int)
+    bad_centroid += 2*(raw[iy, ix] >= 240).astype(int)
+
+    bad_box = np.zeros(n, dtype=int)
+
+    for i in range(n):
+        box = raw[iy_lower[i]:iy_upper[i], ix_lower[i]:ix_upper[i]]
+        boxmax = np.max(box)
+        bad_box[i] += (boxmax == 255).astype(int)
+        bad_box[i] += 2*(boxmax >= 240).astype(int)
+
+    df = pd.DataFrame()
+
+    df['satur_centroid'] = bad_centroid
+    df['satur_box'] = bad_box
+
+    return df

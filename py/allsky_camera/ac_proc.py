@@ -103,6 +103,16 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     bsc['lgal'] = skycoords.galactic.l
     bsc['bgal'] = skycoords.galactic.b
 
+    satur = util.check_saturation(exp.raw_image, bsc['xcentroid'],
+                                  bsc['ycentroid'])
+
+    bsc.reset_index(drop=True, inplace=True)
+
+    assert(len(satur) == len(bsc))
+    assert(np.all(bsc.index == satur.index))
+
+    bsc = pd.concat([bsc, satur], axis=1)
+
     if write_outputs:
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
