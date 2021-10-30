@@ -80,6 +80,21 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = bsc[r_pix <= 500] # factor out 500 special number...
 
+    assert(len(bsc) > 0)
+
+    bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > 0.3] # isolation criterion
+
+    assert(len(bsc) > 0)
+
+    bsc['min_edge_dist_pix'] = util.min_edge_dist_pix(bsc['xcentroid'],
+                                                      bsc['ycentroid'])
+
+    bsc['raw_adu_at_centroid'] = \
+        exp.raw_image[np.round(bsc['ycentroid']).astype(int),
+                      np.round(bsc['xcentroid']).astype(int)]
+
+    bsc['zd_deg'] = 90.0 - bsc['alt_deg']
+
     if write_outputs:
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
