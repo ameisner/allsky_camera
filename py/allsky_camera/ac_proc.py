@@ -93,7 +93,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc['raw_adu_at_centroid'] = \
         exp.raw_image[np.round(bsc['ycentroid']).astype(int),
-                      np.round(bsc['xcentroid']).astype(int)]
+                      np.round(bsc['xcentroid']).astype(int)].astype(int)
 
     bsc['zd_deg'] = 90.0 - bsc['alt_deg']
 
@@ -112,6 +112,13 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     assert(np.all(bsc.index == satur.index))
 
     bsc = pd.concat([bsc, satur], axis=1)
+
+    bsc = bsc[(bsc['satur_centroid'] == 0) & (bsc['satur_box'] == 0) & \
+              (bsc['min_edge_dist_pix'] >= 10)]
+
+    assert(len(bsc) > 0)
+
+    bsc.reset_index(drop=True, inplace=True)
 
     if write_outputs:
         if not dont_write_detrended:

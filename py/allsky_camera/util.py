@@ -515,11 +515,11 @@ def check_saturation(raw, x, y):
         box = raw[iy_lower[i]:iy_upper[i], ix_lower[i]:ix_upper[i]]
         boxmax = np.max(box)
         bad_box[i] += (boxmax == 255).astype(int)
-        bad_box[i] += 2*(boxmax >= 240).astype(int)
+        bad_box[i] += 2*((boxmax >= 240).astype(int))
 
     df = pd.DataFrame()
 
-    df['satur_centroid'] = bad_centroid
+    df['satur_centroid'] = bad_centroid 
     df['satur_box'] = bad_box
 
     return df
