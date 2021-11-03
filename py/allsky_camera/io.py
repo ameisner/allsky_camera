@@ -9,6 +9,7 @@ import astropy.io.fits as fits
 import allsky_camera.common as common
 import os
 import pandas as pd
+from astropy.table import Table
 
 def load_static_badpix():
     """
@@ -88,4 +89,46 @@ def write_image_level_outputs(exp, outdir):
 
     hdu = fits.PrimaryHDU(exp.detrended.astype('float32'), header=exp.header)
     hdu.writeto(outname_tmp)
+    os.rename(outname_tmp, outname)
+
+def write_source_catalog(catalog, exp, outdir):
+    """
+    Write the catalog of bright star position/flux measurements.
+
+    Parameters
+    ----------
+        catalog : pandas.core.frame.DataFrame
+                  The star catalog that will be written out.
+        exp     : allsky_camera.exposure.AC_exposure
+                  All-sky camera exposure object.
+        outdir  : str
+                  Full path of output directory.
+
+    """
+
+    print('Attempting to write catalog output')
+
+    assert(os.path.exists(outdir))
+
+    outname = (os.path.split(exp.fname_im))[-1]
+
+    outname = outname.replace('.fits', '-cat.fits')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    tab = Table.from_pandas(catalog)
+
+    hdul = []
+    hdul.append(fits.PrimaryHDU())
+    hdul.append(fits.BinTableHDU(data=tab, name='CATALOG'))
+
+    hdul = fits.HDUList(hdul)
+
+    hdul.writeto(outname_tmp)
+
     os.rename(outname_tmp, outname)

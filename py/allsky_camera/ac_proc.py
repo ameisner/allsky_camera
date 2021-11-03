@@ -135,6 +135,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     if write_outputs:
         if not os.path.exists(outdir):
             os.mkdir(outdir)
+
+        io.write_source_catalog(bsc, exp, outdir)
+
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
 
