@@ -10,4 +10,24 @@ Here is an example invocation for running the full pipeline:
 
     python -u /global/homes/a/ameisner/allsky_camera/py/allsky_camera/ac_proc.py /global/cfs/cdirs/desi/users/ameisner/MDM/allsky/2020_10_11__21_38_23.fits --outdir .
 
+This produces, among other output, the following photometry/zeropoint check plot:
+
 ![zeropoint checkplot](static/2020_10_11__21_38_23-zp.png)
+
+# full help for running the pipeline
+
+    allsky_camera/py/allsky_camera> python ac_proc.py --help
+    usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] fname_in
+
+    run the all-sky camera reduction pipeline on an exposure
+
+    positional arguments:
+      fname_in              all-sky camera raw image file name
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --outdir OUTDIR       directory to write outputs in
+      --dont_write_detrended
+                            don't write detrended image
+      --multiproc MULTIPROC
+                            number of threads for multiprocessing
