@@ -181,9 +181,9 @@ def zp_checkplot(cat, exp, outdir):
 
     assert(os.path.exists(outdir))
 
-    outname = (os.path.split(exp.fname_im))[-1]
+    basename = (os.path.split(exp.fname_im))[-1]
 
-    outname = outname.replace('.fits', '-zp.png')
+    outname = basename.replace('.fits', '-zp.png')
 
     outname = os.path.join(outdir, outname)
 
@@ -192,6 +192,7 @@ def zp_checkplot(cat, exp, outdir):
     assert(not os.path.exists(outname))
     assert(not os.path.exists(outname_tmp))
 
+    plt.title(basename)
     plt.savefig(outname_tmp, dpi=200, bbox_inches='tight', format='png')
 
     plt.cla()
