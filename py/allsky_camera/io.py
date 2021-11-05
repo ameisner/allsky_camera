@@ -174,6 +174,9 @@ def zp_checkplot(cat, exp, outdir):
 
     plt.xlim(xlim)
 
+    ylim = (xlim[0] - 1 - zp, xlim[1] + 1 - zp)
+    plt.ylim(ylim)
+
     plt.xlabel(xtitle)
     plt.ylabel(ytitle)
 
