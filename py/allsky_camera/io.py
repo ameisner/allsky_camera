@@ -135,7 +135,7 @@ def write_source_catalog(catalog, exp, outdir):
 
     os.rename(outname_tmp, outname)
 
-def zp_checkplot(cat):
+def zp_checkplot(cat, exp, outdir):
     """
     Make/write a checkplot showing the all-sky camera versus BSC mags.
 
@@ -144,6 +144,11 @@ def zp_checkplot(cat):
         cat : pandas.core.dataframe.DataFrame
             Bright star catalog with all-sky camera photometry. Needs to
             have columns 'm_inst' and 'VMAG'
+        exp : allsky_camera.exposure.AC_exposure
+                 All-sky camera exposure object.
+        outdir : str
+                 Full path of output directory.
+
     """
 
     plt.cla()
@@ -172,8 +177,23 @@ def zp_checkplot(cat):
     plt.xlabel(xtitle)
     plt.ylabel(ytitle)
 
-    outname = 'zp.png'
+    print('Attempting to write photometric zeropoint checkplot...')
 
-    plt.savefig(outname, dpi=200, bbox_inches='tight')
+    assert(os.path.exists(outdir))
+
+    outname = (os.path.split(exp.fname_im))[-1]
+
+    outname = outname.replace('.fits', '-zp.png')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    plt.savefig(outname_tmp, dpi=200, bbox_inches='tight', format='png')
 
     plt.cla()
+
+    os.rename(outname_tmp, outname)
