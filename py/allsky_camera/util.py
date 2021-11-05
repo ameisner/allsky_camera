@@ -732,6 +732,17 @@ def zp_checkplot(cat):
 
     plt.scatter(cat['VMAG'], cat['m_inst'], s=10, edgecolor='none')
 
+    # use sigma-clipped median instead?
+    zp = -1.0*np.median(cat['m_inst'] - cat['VMAG'])
+
+    xmin = np.min(cat['VMAG'])
+    xmax = np.max(cat['VMAG'])
+
+    xsamp = np.array([xmin, xmax])
+    ysamp = xsamp - zp
+
+    plt.plot(xsamp, ysamp, c='r')
+
     plt.xlabel(xtitle)
     plt.ylabel(ytitle)
 
