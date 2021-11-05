@@ -20,7 +20,6 @@ import photutils
 from astropy.coordinates import get_moon, EarthLocation, SkyCoord
 import astropy.units as u
 from astropy.time import Time
-import matplotlib.pyplot as plt
 
 def load_exposure_image(fname):
     """
@@ -713,46 +712,3 @@ def trim_catalog_moon(cat, mjd):
     trim.reset_index(drop=True, inplace=True)
 
     return trim
-
-def zp_checkplot(cat):
-    """
-    Make/write a checkplot showing the all-sky camera versus BSC mags.
-
-    Parameters
-    ----------
-        cat : pandas.core.dataframe.DataFrame
-            Bright star catalog with all-sky camera photometry. Needs to
-            have columns 'm_inst' and 'VMAG'
-    """
-
-    plt.cla()
-
-    xtitle = 'BSC V magnitude'
-    ytitle = '-2.5' + r'$\times$' + 'log'  + r'$_{10}$' + '(ADU/sec)'
-
-    plt.scatter(cat['VMAG'], cat['m_inst'], s=10, edgecolor='none')
-
-    # use sigma-clipped median instead?
-    zp = -1.0*np.median(cat['m_inst'] - cat['VMAG'])
-
-    xmin = np.min(cat['VMAG'])
-    xmax = np.max(cat['VMAG'])
-
-    xsamp = np.array([xmin, xmax])
-    ysamp = xsamp - zp
-
-    plt.plot(xsamp, ysamp, c='r')
-
-    pad_mags = 0.04
-    xlim = (xmin-pad_mags, xmax+pad_mags)
-
-    plt.xlim(xlim)
-
-    plt.xlabel(xtitle)
-    plt.ylabel(ytitle)
-
-    outname = 'zp.png'
-
-    plt.savefig(outname, dpi=200, bbox_inches='tight')
-
-    plt.cla()

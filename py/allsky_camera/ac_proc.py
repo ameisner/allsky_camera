@@ -145,7 +145,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
 
-        util.zp_checkplot(bsc)
+        io.zp_checkplot(bsc)
 
     dt = time.time()-t0
 
