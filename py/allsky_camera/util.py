@@ -17,6 +17,9 @@ import copy
 from allsky_camera.analysis.djs_photcen import djs_photcen
 from photutils import CircularAperture, CircularAnnulus, aperture_photometry
 import photutils
+from astropy.coordinates import get_moon, EarthLocation
+import astropy.units as u
+from astropy.time import Time
 
 def load_exposure_image(fname):
     """
@@ -634,3 +637,35 @@ def ac_aper_phot(_im, x, y, bg_sigclip=False):
     cat['flux_adu'] = flux_adu
 
     return cat
+
+def get_moon_position(mjd):
+    """
+    Get Moon (ra, dec).
+
+    Parameters
+    ----------
+        mjd : float
+            MJD at which to compute the Moon's 
+
+    Returns
+    -------
+        coords : astropy.coordinates.sky_coordinate.SkyCoord
+            SkyCoord object providing the Moon's (RA, Dec) at the desired MJD.
+
+    Notes
+    -----
+        For now, intended for scalar MJD input, not array-valued.
+
+    """
+
+    par = common.ac_params()
+
+    location = EarthLocation(lat=par['kpno_lat']*u.deg,
+                             lon=par['kpno_lon']*u.deg,
+                             height=par['kpno_elev_meters']*u.m)
+
+    time = Time(str(mjd), format='mjd')
+
+    coords = get_moon(time, location=location)
+
+    return coords
