@@ -145,6 +145,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
 
+        util.zp_checkplot(bsc)
+
     dt = time.time()-t0
 
     print('all-sky camera reduction pipeline took ' + '{:.2f}'.format(dt) +
