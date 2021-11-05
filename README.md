@@ -14,6 +14,15 @@ This produces, among other output, the following photometry/zeropoint check plot
 
 ![zeropoint checkplot](static/2020_10_11__21_38_23-zp.png)
 
+The list of outputs produced is:
+
+    2020_10_11__21_38_23-cat.fits
+    2020_10_11__21_38_23-detrended.fits
+    2020_10_11__21_38_23-zp.png
+
+* The -cat.fits output is a FITS binary table with the source catalog including measured centroid locations and fluxes.
+* The -detrended.fits output is a detrended version of the raw all-sky camera image.
+
 # full help for running the pipeline
 
     allsky_camera/py/allsky_camera> python ac_proc.py --help
