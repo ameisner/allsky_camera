@@ -134,6 +134,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = util.trim_catalog_moon(bsc, exp.mjd)
 
+    bsc['m_inst'] = -2.5*np.log10(bsc['flux_adu']/exp.time_seconds)
+
     if write_outputs:
         if not os.path.exists(outdir):
             os.mkdir(outdir)
