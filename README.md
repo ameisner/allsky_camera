@@ -22,6 +22,7 @@ The list of outputs produced is:
 
 * The -cat.fits output is a FITS binary table with the source catalog including measured centroid locations and fluxes.
 * The -detrended.fits output is a detrended version of the raw all-sky camera image.
+* The -zp.png output is a checkplot showing the all-sky camera photometry and corresponding zeropoint measurement.
 
 # full help for running the pipeline
 
