@@ -728,7 +728,7 @@ def zp_checkplot(cat):
     plt.cla()
 
     xtitle = 'BSC V magnitude'
-    ytitle = '-2.5' + r'$\times$' + 'log'  + r'$_{10}(ADU/sec)$'
+    ytitle = '-2.5' + r'$\times$' + 'log'  + r'$_{10}$' + '(ADU/sec)'
 
     plt.scatter(cat['VMAG'], cat['m_inst'], s=10, edgecolor='none')
 
