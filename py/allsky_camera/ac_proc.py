@@ -132,6 +132,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc.reset_index(drop=True, inplace=True)
 
+    bsc = util.trim_catalog_moon(bsc, exp.mjd)
+
     if write_outputs:
         if not os.path.exists(outdir):
             os.mkdir(outdir)

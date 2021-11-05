@@ -17,7 +17,7 @@ import copy
 from allsky_camera.analysis.djs_photcen import djs_photcen
 from photutils import CircularAperture, CircularAnnulus, aperture_photometry
 import photutils
-from astropy.coordinates import get_moon, EarthLocation
+from astropy.coordinates import get_moon, EarthLocation, SkyCoord
 import astropy.units as u
 from astropy.time import Time
 
@@ -645,7 +645,7 @@ def get_moon_position(mjd):
     Parameters
     ----------
         mjd : float
-            MJD at which to compute the Moon's 
+            MJD at which to compute the Moon's coordinates.
 
     Returns
     -------
@@ -669,3 +669,46 @@ def get_moon_position(mjd):
     coords = get_moon(time, location=location)
 
     return coords
+
+def trim_catalog_moon(cat, mjd):
+    """
+    Trim star catalog to avoid including sky locations near the Moon.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Bright star catalog.
+        mjd : float
+            MJD at which to compute the Moon's coordinates.
+
+    Returns
+    -------
+        trim : pandas.core.dataframe.DataFrame
+            Copy of the input catalog with rows within 15 degrees of the Moon
+            removed.
+
+    """
+
+    print('Cutting sources potentially affected by the Moon...')
+
+    moon = get_moon_position(mjd)
+
+    trim = copy.deepcopy(cat)
+
+    stars = SkyCoord(cat['RA']*u.deg, cat['DEC']*u.deg)
+
+    ang_sep = moon.separation(stars)
+
+    thresh = 15.0 # degrees of Moon separation; factor out to ac_params?
+
+    trim['moon_sep_deg'] = ang_sep
+
+    trim = trim[ang_sep.deg > thresh]
+
+    # add printout regarding how many sources were rejected due to
+    # Moon proximity?
+    print('Removed ' + str(len(cat)-len(trim)) + ' sources nearby the Moon...')
+
+    trim.reset_index(drop=True, inplace=True)
+
+    return trim
