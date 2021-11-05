@@ -743,6 +743,11 @@ def zp_checkplot(cat):
 
     plt.plot(xsamp, ysamp, c='r')
 
+    pad_mags = 0.04
+    xlim = (xmin-pad_mags, xmax+pad_mags)
+
+    plt.xlim(xlim)
+
     plt.xlabel(xtitle)
     plt.ylabel(ytitle)
 
