@@ -551,7 +551,7 @@ def _get_area_from_ap(ap):
 
     """
 
-    if (photutils.__version__.find('0.7') != -1) or (photutils.__version__.find('1.0') != -1):
+    if (photutils.__version__.find('0.7') != -1) or (photutils.__version__.find('1.0') != -1) or (photutils.__version__.find('1.2') != -1):
         area = ap.area # 0.7
     else:
         area = ap.area() # 0.6
