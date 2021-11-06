@@ -93,13 +93,13 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     bsc['min_edge_dist_pix'] = util.min_edge_dist_pix(bsc['xcentroid'],
                                                       bsc['ycentroid'])
 
-    bsc['raw_adu_at_centroid'] = \
-        exp.raw_image[np.round(bsc['ycentroid']).astype(int),
-                      np.round(bsc['xcentroid']).astype(int)].astype(int)
-
     bsc['zd_deg'] = 90.0 - bsc['alt_deg']
 
     bsc = util.catalog_galactic_coords(bsc)
+
+    bsc['raw_adu_at_centroid'] = \
+        exp.raw_image[np.round(bsc['ycentroid']).astype(int),
+                      np.round(bsc['xcentroid']).astype(int)].astype(int)
 
     satur = util.check_saturation(exp.raw_image, bsc['xcentroid'],
                                   bsc['ycentroid'])
@@ -118,18 +118,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc.reset_index(drop=True, inplace=True)
 
-    phot = util.ac_aper_phot(exp.raw_image, bsc['xcentroid'],
-                             bsc['ycentroid'])
-
-    bsc = pd.concat([bsc, phot], axis=1)
-
-    bsc = bsc[bsc['flux_adu'] > 0]
-
-    bsc.reset_index(drop=True, inplace=True)
+    bsc = util.ac_phot(exp, bsc)
 
     bsc = util.trim_catalog_moon(bsc, exp.mjd)
-
-    bsc['m_inst'] = -2.5*np.log10(bsc['flux_adu']/exp.time_seconds)
 
     if write_outputs:
         if not os.path.exists(outdir):

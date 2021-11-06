@@ -737,3 +737,35 @@ def catalog_galactic_coords(cat):
     cat['bgal'] = skycoords.galactic.b
 
     return cat
+
+def ac_phot(exp, cat):
+    """
+    Wrapper for aperture photometry and some related catalog repackaging.
+
+    Parameters
+    ----------
+        exp : allsky_camera.exposure.AC_exposure
+            All-sky camera exposure object for the image being analyzed.
+        cat : allsky_camera.starcat.StarCat
+            Bright star catalog object. Should already have refined
+            centroids computed and stored in the 'xcentroid' and
+            'ycentroid' columns.
+
+    Returns
+    -------
+        cat : allsky_camera.starcat.StarCat
+            Modified version of input catalog with added photometry columns,
+            and also trimmed to sources found to have positive aperture flux.
+    """
+
+    phot = ac_aper_phot(exp.detrended, cat['xcentroid'], cat['ycentroid'])
+
+    cat = pd.concat([cat, phot], axis=1)
+
+    cat = cat[cat['flux_adu'] > 0]
+
+    cat.reset_index(drop=True, inplace=True)
+
+    cat['m_inst'] = -2.5 * np.log10(cat['flux_adu'] / exp.time_seconds)
+
+    return cat
