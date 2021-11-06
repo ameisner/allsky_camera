@@ -712,3 +712,28 @@ def trim_catalog_moon(cat, mjd):
     trim.reset_index(drop=True, inplace=True)
 
     return trim
+
+def catalog_galactic_coords(cat):
+    """
+    Compute galactic coordinates for catalog and add these as new columns.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Catalog for which to compute Galactic coordinates. Needs to
+            have columns 'RA' and 'DEC' (with values in degrees)
+
+    Returns
+    -------
+        cat : pandas.core.dataframe.DataFrame
+            Modified version of input catalog with Galactic coordinates
+            added in columns named 'lgal' and 'bgal' (units of degrees).
+    """
+
+    skycoords = SkyCoord(cat['RA']*u.deg, cat['DEC']*u.deg,
+                         frame='icrs')
+
+    cat['lgal'] = skycoords.galactic.l
+    cat['bgal'] = skycoords.galactic.b
+
+    return cat

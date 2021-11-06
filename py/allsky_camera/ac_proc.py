@@ -17,7 +17,6 @@ import allsky_camera.io as io
 import allsky_camera.starcat as starcat
 import numpy as np
 import pandas as pd
-from astropy.coordinates import SkyCoord
 from astropy import units as u
 import allsky_camera.common as common
 
@@ -100,11 +99,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc['zd_deg'] = 90.0 - bsc['alt_deg']
 
-    skycoords = SkyCoord(bsc['RA']*u.deg, bsc['DEC']*u.deg,
-                         frame='icrs')
-
-    bsc['lgal'] = skycoords.galactic.l
-    bsc['bgal'] = skycoords.galactic.b
+    bsc = util.catalog_galactic_coords(bsc)
 
     satur = util.check_saturation(exp.raw_image, bsc['xcentroid'],
                                   bsc['ycentroid'])
