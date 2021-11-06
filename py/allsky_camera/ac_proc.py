@@ -14,9 +14,6 @@ import os
 from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
-import numpy as np
-import pandas as pd
-import allsky_camera.common as common
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None):
