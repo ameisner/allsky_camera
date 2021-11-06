@@ -17,7 +17,6 @@ import allsky_camera.io as io
 import allsky_camera.starcat as starcat
 import numpy as np
 import pandas as pd
-from astropy import units as u
 import allsky_camera.common as common
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
