@@ -20,6 +20,7 @@ import photutils
 from astropy.coordinates import get_moon, EarthLocation, SkyCoord
 import astropy.units as u
 from astropy.time import Time
+import allsky_camera.starcat as starcat
 
 def load_exposure_image(fname):
     """
@@ -769,3 +770,80 @@ def ac_phot(exp, cat):
     cat['m_inst'] = -2.5 * np.log10(cat['flux_adu'] / exp.time_seconds)
 
     return cat
+
+def ac_catalog(exp):
+    """
+    Driver to perform bright star catalog recentroiding and aperture photometry.
+
+    Parameters
+    ----------
+        exp : allsky_camera.exposure.AC_exposure
+            All-sky camera exposure object for the image being analyzed.
+
+    Returns
+    -------
+        bsc : pandas.core.dataframe.DataFrame
+            Bright star catalog including refined centroids and
+            aperture photometry.
+
+    """
+
+    sc = starcat.StarCat()
+    bsc = sc.cat_with_pixel_coords(exp.mjd)
+
+    centroids = ac_recentroid(exp.detrended, bsc['x'], bsc['y'])
+
+    assert(len(centroids) == len(bsc))
+    assert(np.all(bsc.index == centroids.index))
+
+    bsc = pd.concat([bsc, centroids], axis=1)
+
+    bsc = bsc[bsc['qmaxshift'] == 0] # restrict to good centroids
+
+    assert(len(bsc) > 0)
+
+    r_pix = zenith_radius_pix(bsc['x'], bsc['y'])
+
+    bsc = bsc[r_pix <= 500] # factor out 500 special number...
+
+    assert(len(bsc) > 0)
+
+    par = common.ac_params()
+    # isolation criterion
+    bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > par['iso_thresh_deg']]
+
+    assert(len(bsc) > 0)
+
+    bsc['min_edge_dist_pix'] = min_edge_dist_pix(bsc['xcentroid'],
+                                                 bsc['ycentroid'])
+
+    bsc['zd_deg'] = 90.0 - bsc['alt_deg']
+
+    bsc = catalog_galactic_coords(bsc)
+
+    bsc['raw_adu_at_centroid'] = \
+        exp.raw_image[np.round(bsc['ycentroid']).astype(int),
+                      np.round(bsc['xcentroid']).astype(int)].astype(int)
+
+    satur = check_saturation(exp.raw_image, bsc['xcentroid'],
+                                  bsc['ycentroid'])
+
+    bsc.reset_index(drop=True, inplace=True)
+
+    assert(len(satur) == len(bsc))
+    assert(np.all(bsc.index == satur.index))
+
+    bsc = pd.concat([bsc, satur], axis=1)
+
+    bsc = bsc[(bsc['satur_centroid'] == 0) & (bsc['satur_box'] == 0) & \
+              (bsc['min_edge_dist_pix'] >= 10)]
+
+    assert(len(bsc) > 0)
+
+    bsc.reset_index(drop=True, inplace=True)
+
+    bsc = ac_phot(exp, bsc)
+
+    bsc = trim_catalog_moon(bsc, exp.mjd)
+
+    return bsc

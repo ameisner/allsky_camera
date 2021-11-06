@@ -14,7 +14,6 @@ import os
 from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
-import allsky_camera.starcat as starcat
 import numpy as np
 import pandas as pd
 import allsky_camera.common as common
@@ -63,63 +62,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     # pixel-level detrending
     util.detrend_ac(exp)
 
-    sc = starcat.StarCat()
-    bsc = sc.cat_with_pixel_coords(exp.mjd)
-
-    centroids = util.ac_recentroid(exp.detrended, bsc['x'], bsc['y'])
-
-    assert(len(centroids) == len(bsc))
-    assert(np.all(bsc.index == centroids.index))
-
-    bsc = pd.concat([bsc, centroids], axis=1)
-
-    bsc = bsc[bsc['qmaxshift'] == 0] # restrict to good centroids
-
-    assert(len(bsc) > 0)
-
-    r_pix = util.zenith_radius_pix(bsc['x'], bsc['y'])
-
-    bsc = bsc[r_pix <= 500] # factor out 500 special number...
-
-    assert(len(bsc) > 0)
-
-    par = common.ac_params()
-    # isolation criterion
-    bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > par['iso_thresh_deg']]
-
-    assert(len(bsc) > 0)
-
-    bsc['min_edge_dist_pix'] = util.min_edge_dist_pix(bsc['xcentroid'],
-                                                      bsc['ycentroid'])
-
-    bsc['zd_deg'] = 90.0 - bsc['alt_deg']
-
-    bsc = util.catalog_galactic_coords(bsc)
-
-    bsc['raw_adu_at_centroid'] = \
-        exp.raw_image[np.round(bsc['ycentroid']).astype(int),
-                      np.round(bsc['xcentroid']).astype(int)].astype(int)
-
-    satur = util.check_saturation(exp.raw_image, bsc['xcentroid'],
-                                  bsc['ycentroid'])
-
-    bsc.reset_index(drop=True, inplace=True)
-
-    assert(len(satur) == len(bsc))
-    assert(np.all(bsc.index == satur.index))
-
-    bsc = pd.concat([bsc, satur], axis=1)
-
-    bsc = bsc[(bsc['satur_centroid'] == 0) & (bsc['satur_box'] == 0) & \
-              (bsc['min_edge_dist_pix'] >= 10)]
-
-    assert(len(bsc) > 0)
-
-    bsc.reset_index(drop=True, inplace=True)
-
-    bsc = util.ac_phot(exp, bsc)
-
-    bsc = util.trim_catalog_moon(bsc, exp.mjd)
+    bsc = util.ac_catalog(exp)
 
     if write_outputs:
         if not os.path.exists(outdir):
