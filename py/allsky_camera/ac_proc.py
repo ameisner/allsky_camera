@@ -16,7 +16,7 @@ import allsky_camera.util as util
 import allsky_camera.io as io
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
-            nmp=None):
+            nmp=None, skip_checkplots=False):
     """
     Process one all-sky camera image.
 
@@ -70,8 +70,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if not dont_write_detrended:
             io.write_image_level_outputs(exp, outdir)
 
-        io.zp_checkplot(bsc, exp, outdir)
-        io.centroid_quiver_plot(bsc, exp, outdir)
+        if not skip_checkplots:
+            io.zp_checkplot(bsc, exp, outdir)
+            io.centroid_quiver_plot(bsc, exp, outdir)
 
     dt = time.time()-t0
 
@@ -98,8 +99,12 @@ if __name__ == "__main__":
     parser.add_argument('--multiproc', default=None, type=int,
                         help="number of threads for multiprocessing")
 
+    parser.add_argument('--skip_checkplots', default=False,
+                        action='store_true',
+                        help="don't create checkplots")
+
     args = parser.parse_args()
 
     ac_proc(args.fname_in[0], outdir=args.outdir,
             dont_write_detrended=args.dont_write_detrended,
-            nmp=args.multiproc)
+            nmp=args.multiproc, skip_checkplots=args.skip_checkplots)
