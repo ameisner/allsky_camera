@@ -206,3 +206,39 @@ def zp_checkplot(cat, exp, outdir):
     plt.cla()
 
     os.rename(outname_tmp, outname)
+
+def centroid_quiver_plot(cat, exp, outdir):
+    """
+    Make/write a checkplot showing a quiver plot of the astrometric residuals.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Bright star catalog with all-sky camera photometry. Needs to
+            have columns 'dx', 'dy', 'xcentroid', 'ycentroid'
+        exp : allsky_camera.exposure.AC_exposure
+                 All-sky camera exposure object.
+        outdir : str
+                 Full path of output directory.
+
+    """
+
+    plt.cla()
+    dx = cat['xcentroid'] - cat['x']
+    dy = cat['ycentroid'] - cat['y']
+
+    plt.figure(figsize=(8, 8))
+
+    q = plt.quiver(cat['x'], cat['y'], dx, dy, scale=10, scale_units='inches')
+
+    title = os.path.split(exp.fname_im)[-1]
+
+    title = title.replace('-catalog.fits', '')
+    plt.title(title + ' ; astrometric model residuals ; altitude > 20 deg')
+
+    plt.xlabel('x pixel coordinate', fontsize=12)
+    plt.ylabel('y pixel coordinate', fontsize=12)
+    outname = title + '-quiver.png'
+
+    plt.savefig(outname, bbox_inches='tight')
+    plt.cla()

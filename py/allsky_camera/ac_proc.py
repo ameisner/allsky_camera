@@ -71,6 +71,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             io.write_image_level_outputs(exp, outdir)
 
         io.zp_checkplot(bsc, exp, outdir)
+        io.centroid_quiver_plot(bsc, exp, outdir)
 
     dt = time.time()-t0
 
