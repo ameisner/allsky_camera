@@ -195,7 +195,12 @@ def zp_checkplot(cat, exp, outdir):
     assert(not os.path.exists(outname))
     assert(not os.path.exists(outname_tmp))
 
-    plt.title(basename)
+    title = basename
+
+    # will this have a problem if somehow zp is NaN-like?
+    title += ' ; ZP = ' + '{:.3f}'.format(zp) + ' mag'
+
+    plt.title(title)
     plt.savefig(outname_tmp, dpi=200, bbox_inches='tight', format='png')
 
     plt.cla()
