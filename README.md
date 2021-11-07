@@ -14,6 +14,10 @@ This produces, among other output, the following photometry/zeropoint check plot
 
 ![zeropoint checkplot](static/2020_10_11__21_38_23-zp.png)
 
+The following checkplot of astrometric residuals relative to the static template is also produced:
+
+![astrometry checkplot](static/2020_10_11__21_38_23-quiver.png)
+
 The list of outputs produced is:
 
     2020_10_11__21_38_23-cat.fits
