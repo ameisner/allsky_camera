@@ -231,14 +231,32 @@ def centroid_quiver_plot(cat, exp, outdir):
 
     q = plt.quiver(cat['x'], cat['y'], dx, dy, scale=10, scale_units='inches')
 
+    # would be nice to add an arrow/legend indicating what the arrow size means
+    # (what the units are)
+
     title = os.path.split(exp.fname_im)[-1]
 
-    title = title.replace('-catalog.fits', '')
+    # where does the altitude > 20 cut happen?
     plt.title(title + ' ; astrometric model residuals ; altitude > 20 deg')
 
     plt.xlabel('x pixel coordinate', fontsize=12)
     plt.ylabel('y pixel coordinate', fontsize=12)
-    outname = title + '-quiver.png'
 
-    plt.savefig(outname, bbox_inches='tight')
+    assert(os.path.exists(outdir))
+
+    basename = (os.path.split(exp.fname_im))[-1]
+
+    outname = basename.replace('.fits', '-quiver.png')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    plt.savefig(outname_tmp, bbox_inches='tight', format='png')
+
     plt.cla()
+
+    os.rename(outname_tmp, outname)
