@@ -215,7 +215,7 @@ def centroid_quiver_plot(cat, exp, outdir):
     ----------
         cat : pandas.core.dataframe.DataFrame
             Bright star catalog with all-sky camera photometry. Needs to
-            have columns 'dx', 'dy', 'xcentroid', 'ycentroid'
+            have columns 'x', 'y', 'xcentroid', 'ycentroid'
         exp : allsky_camera.exposure.AC_exposure
                  All-sky camera exposure object.
         outdir : str

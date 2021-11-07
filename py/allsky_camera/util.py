@@ -21,6 +21,7 @@ from astropy.coordinates import get_moon, EarthLocation, SkyCoord
 import astropy.units as u
 from astropy.time import Time
 import allsky_camera.starcat as starcat
+from scipy.ndimage import median_filter
 
 def load_exposure_image(fname):
     """
@@ -259,6 +260,28 @@ def get_starting_mjd(header):
 
     return mjd
 
+def zd_deg_to_r_pix(zd_deg):
+    """
+
+    Parameters
+    ----------
+        zd_deg : numpy.ndarray
+            Zenith distance in degrees.
+
+    Returns
+    -------
+        r_pix : numpy.ndarray
+            Zenith distance in all-sky camera pixels. Same dimensions as input zd_deg.
+    """
+
+    par = common.ac_params()
+
+    r_pix = (zd_deg/90.0)*par['horizon_radius_pix'] + par['coeff2']*(zd_deg**2) + \
+            par['coeff3']*(zd_deg**3)
+
+    return r_pix
+
+
 def altaz_to_xy(alt, az):
     """
     Convert (altitude, azimuth) to predicted detector pixel coordinates.
@@ -281,8 +304,7 @@ def altaz_to_xy(alt, az):
 
     zd = 90.0 - alt # zenith distance in degrees
 
-    r_pix = (zd/90.0)*par['horizon_radius_pix'] + par['coeff2']*(zd**2) + \
-            par['coeff3']*(zd**3)
+    r_pix = zd_deg_to_r_pix(zd)
 
     radeg = 180.0/np.pi
 
@@ -847,3 +869,119 @@ def ac_catalog(exp):
     bsc = trim_catalog_moon(bsc, exp.mjd)
 
     return bsc
+
+def r_pix_to_zd(r_pix):
+    """
+    Convert from zenith distance in pixels to zenith distance in degrees.
+
+    Parameters
+    ----------
+        r_pix : numpy.ndarray
+            Zenith distance in pixels.
+
+    Returns
+    -------
+        zd_deg : numpy.ndarray
+            Zenith distance in degrees.
+
+    Notes
+    -----
+        Need to think more about apparent versus true zenith distance...
+    """
+
+    # these special numbers need to be factored out
+    icoeff = [-0.0016925985, 0.14376865, -1.3883376e-5, 1.7793004e-8]
+
+    zd_deg = np.polyval(icoeff, r_pix)
+
+    zd_deg = np.maximum(zd_deg, 0)
+
+    return zd_deg
+
+def pixel_solid_angle(zd_deg):
+    """
+    Compute spatially varying pixel solid angle in square arcminutes.
+
+    Parameters
+    ----------
+        zd_deg : numpy.ndarray
+            Zenith distance in degrees.
+
+    Returns
+    -------
+        area_sq_arcmin : numpy.ndarray
+            Pixel solid angle in units of square arcminutes.
+
+    """
+
+    r_pix = zd_deg_to_r_pix(zd_deg)
+
+    par = common.ac_params()
+
+    # dr/d(z_d) derivative
+    dr_dzd = par['horizon_radius_pix']/90.0 + 2*par['coeff2']*zd_deg + 3*par['coeff3']*(zd_deg**2)
+
+    area = (zd_deg/r_pix)*(1.0/dr_dzd) # sq deg
+
+    # are these special handling steps for being at/near zenith necessary?
+    area_zenith =  (90.0/par['horizon_radius_pix'])**2 # sq deg
+    area[r_pix <= 0] = area_zenith
+
+    area_sq_arcmin = area*(60.0**2) # square arcminutes
+
+    return area_sq_arcmin
+
+def sky_brightness_map(detrended, exptime):
+    """
+    Make a map of sky magnitude per square arcsecond.
+
+    Parameters
+    ----------
+        detrended : numpy.ndarray
+            2D numpy array representing the detrended all-sky camera image.
+        exptime : float
+            Exposure time in seconds.
+
+    Returns
+    -------
+        mag_per_sq_asec : numpy.ndarray
+            2D numpy array representing the sky brightness map.
+    """
+
+    sh = detrended.shape
+
+    assert(len(sh) == 2)
+
+    # median filter square kernel sidelength, in pixels
+    # should probably extract this to common.ac_params list of special numbers at some point
+    ksize = 23
+
+    print('Computing median filtered version of the detrended image...')
+    med = median_filter(detrended, ksize)
+    print('Done computing median filtered image...')
+
+    par = common.ac_params()
+
+    ybox, xbox = np.mgrid[0:par['ny'], 0:par['nx']]
+
+    r_pix = zenith_radius_pix(xbox, ybox)
+
+    zd_deg = r_pix_to_zd(r_pix)
+
+    # again this '500' pixel radius special number...
+    zd_deg[r_pix > 500] = np.nan
+
+    sq_arcmin = pixel_solid_angle(zd_deg)
+
+    # put sky counts in ADU / sec / pix
+    med = med / exptime
+
+    # put sky counts in ADU / sec / (sq arcmin)
+    med = med / sq_arcmin
+
+    # put sky counts in ADU / sec / (sq asec)
+    med = med / 3600.0
+
+    mag_per_sq_asec = -2.5 * np.log10(med) + par['zp_adu_per_s']
+
+    return mag_per_sq_asec
