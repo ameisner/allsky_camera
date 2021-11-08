@@ -31,7 +31,7 @@ The list of outputs produced is:
 # full help for running the pipeline
 
     allsky_camera/py/allsky_camera> python ac_proc.py --help
-    usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] fname_in
+    usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] [--skip_checkplots] fname_in
 
     run the all-sky camera reduction pipeline on an exposure
 
@@ -45,3 +45,4 @@ The list of outputs produced is:
                             don't write detrended image
       --multiproc MULTIPROC
                             number of threads for multiprocessing
+      --skip_checkplots     don't create checkplots
