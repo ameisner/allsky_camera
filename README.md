@@ -23,6 +23,7 @@ The list of outputs produced is:
     2020_10_11__21_38_23-cat.fits
     2020_10_11__21_38_23-detrended.fits
     2020_10_11__21_38_23-zp.png
+    2020_10_11__21_38_23-quiver.png
 
 * The -cat.fits output is a FITS binary table with the source catalog including measured centroid locations and fluxes.
 * The -detrended.fits output is a detrended version of the raw all-sky camera image.
