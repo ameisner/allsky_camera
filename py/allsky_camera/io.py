@@ -12,6 +12,7 @@ import pandas as pd
 from astropy.table import Table
 import matplotlib.pyplot as plt
 import numpy as np
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def load_static_badpix():
     """
@@ -288,10 +289,14 @@ def sky_brightness_plot(sbmap, exp, outdir):
     plt.xticks([])
     plt.yticks([])
 
-    cbar = plt.colorbar(ims)
-
     ax = plt.gca()
-    cbar.ax.set_ylabel('V mag per sq asec')
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+
+    cbar = plt.colorbar(ims, cax=cax)
+
+    cbar.ax.set_ylabel('V mag per sq asec', fontsize=16)
 
     assert(os.path.exists(outdir))
 
