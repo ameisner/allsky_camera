@@ -22,6 +22,7 @@ import astropy.units as u
 from astropy.time import Time
 import allsky_camera.starcat as starcat
 from scipy.ndimage import median_filter
+import time
 
 def load_exposure_image(fname):
     """
@@ -959,8 +960,10 @@ def sky_brightness_map(detrended, exptime):
     ksize = 23
 
     print('Computing median filtered version of the detrended image...')
+    t0 = time.time()
     med = median_filter(detrended, ksize)
-    print('Done computing median filtered image...')
+    dt = time.time() - t0
+    print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
 
     par = common.ac_params()
 
