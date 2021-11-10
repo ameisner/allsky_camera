@@ -260,3 +260,37 @@ def centroid_quiver_plot(cat, exp, outdir):
     plt.cla()
 
     os.rename(outname_tmp, outname)
+
+def sky_brightness_plot(sbmap, exp, outdir):
+    """
+    Plot a map of the sky brightness with a corresponding color bar.
+
+    Parameters
+    ----------
+        sbmap : numpy.ndarray
+            2D image representing the sky brightness as measured by the
+            all-sky camera. Contains NaN values denoting detector locations at
+            excessively low elevation.
+        exp : allsky_camera.exposure.AC_exposure
+                 All-sky camera exposure object.
+        outdir : str
+                 Full path of output directory.
+    """
+
+    vmin = np.nanmin(sbmap)
+    vmax = np.nanmax(sbmap)
+
+    ims = plt.imshow(sbmap, vmin=vmin, vmax=vmax, interpolation='nearest',
+                     origin='lower', cmap='gray_r')
+
+    #title = os.path.split(fname)[-1] + ' ; altitude > 20 deg'
+    #plt.title(title)
+    plt.xticks([])
+    plt.yticks([])
+
+    cbar = plt.colorbar(ims)
+
+    ax = plt.gca()
+    cbar.ax.set_ylabel('V mag per sq asec')
+
+    plt.savefig('sky_brightness_map.png', bbox_inches='tight')
