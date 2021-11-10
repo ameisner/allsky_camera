@@ -280,6 +280,13 @@ def sky_brightness_plot(sbmap, exp, outdir):
 
     plt.cla()
 
+    assert(os.path.exists(outdir))
+
+    basename = (os.path.split(exp.fname_im))[-1]
+
+    title = basename + ' ; altitude > 20 deg'
+    plt.title(title)
+
     vmin = np.nanmin(sbmap)
     vmax = np.nanmax(sbmap)
 
@@ -297,10 +304,6 @@ def sky_brightness_plot(sbmap, exp, outdir):
     cbar = plt.colorbar(ims, cax=cax)
 
     cbar.ax.set_ylabel('V mag per sq asec', fontsize=16)
-
-    assert(os.path.exists(outdir))
-
-    basename = (os.path.split(exp.fname_im))[-1]
 
     outname = basename.replace('.fits', '-sbmap.png')
 
