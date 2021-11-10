@@ -61,6 +61,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = util.ac_catalog(exp)
 
+    sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds)
+
     if write_outputs:
         if not os.path.exists(outdir):
             os.mkdir(outdir)
@@ -73,6 +75,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if not skip_checkplots:
             io.zp_checkplot(bsc, exp, outdir)
             io.centroid_quiver_plot(bsc, exp, outdir)
+            io.sky_brightness_plot(sbmap, exp, outdir)
 
     dt = time.time()-t0
 
