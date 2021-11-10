@@ -277,6 +277,8 @@ def sky_brightness_plot(sbmap, exp, outdir):
                  Full path of output directory.
     """
 
+    plt.cla()
+
     vmin = np.nanmin(sbmap)
     vmax = np.nanmax(sbmap)
 
@@ -294,3 +296,5 @@ def sky_brightness_plot(sbmap, exp, outdir):
     cbar.ax.set_ylabel('V mag per sq asec')
 
     plt.savefig('sky_brightness_map.png', bbox_inches='tight')
+
+    plt.cla()
