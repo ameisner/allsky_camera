@@ -951,6 +951,8 @@ def sky_brightness_map(detrended, exptime):
             2D numpy array representing the sky brightness map.
     """
 
+    print('Making a map of the sky brightness in V mag per square arcsec...')
+
     sh = detrended.shape
 
     assert(len(sh) == 2)

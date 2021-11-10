@@ -285,8 +285,6 @@ def sky_brightness_plot(sbmap, exp, outdir):
     ims = plt.imshow(sbmap, vmin=vmin, vmax=vmax, interpolation='nearest',
                      origin='lower', cmap='gray_r')
 
-    #title = os.path.split(fname)[-1] + ' ; altitude > 20 deg'
-    #plt.title(title)
     plt.xticks([])
     plt.yticks([])
 

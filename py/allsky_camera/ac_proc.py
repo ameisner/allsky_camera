@@ -16,7 +16,7 @@ import allsky_camera.util as util
 import allsky_camera.io as io
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
-            nmp=None, skip_checkplots=False):
+            nmp=None, skip_checkplots=False, skip_sbmap=False):
     """
     Process one all-sky camera image.
 
@@ -61,7 +61,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = util.ac_catalog(exp)
 
-    sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds)
+    if not skip_sbmap:
+        sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds)
 
     if write_outputs:
         if not os.path.exists(outdir):
@@ -75,7 +76,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if not skip_checkplots:
             io.zp_checkplot(bsc, exp, outdir)
             io.centroid_quiver_plot(bsc, exp, outdir)
-            io.sky_brightness_plot(sbmap, exp, outdir)
+            if not skip_sbmap:
+                io.sky_brightness_plot(sbmap, exp, outdir)
 
     dt = time.time()-t0
 
@@ -106,8 +108,13 @@ if __name__ == "__main__":
                         action='store_true',
                         help="don't create checkplots")
 
+    parser.add_argument('--skip_sbmap', default=False,
+                        action='store_true',
+                        help="don't do sky brightness map")
+
     args = parser.parse_args()
 
     ac_proc(args.fname_in[0], outdir=args.outdir,
             dont_write_detrended=args.dont_write_detrended,
-            nmp=args.multiproc, skip_checkplots=args.skip_checkplots)
+            nmp=args.multiproc, skip_checkplots=args.skip_checkplots,
+            skip_sbmap=args.skip_sbmap)
