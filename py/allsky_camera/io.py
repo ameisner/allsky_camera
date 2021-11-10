@@ -11,6 +11,7 @@ import os
 import pandas as pd
 from astropy.table import Table
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -290,8 +291,13 @@ def sky_brightness_plot(sbmap, exp, outdir):
     vmin = np.nanmin(sbmap)
     vmax = np.nanmax(sbmap)
 
-    ims = plt.imshow(sbmap, vmin=vmin, vmax=vmax, interpolation='nearest',
-                     origin='lower', cmap='gray_r')
+    sbmap_masked = np.ma.masked_where(np.logical_not(np.isfinite(sbmap)), sbmap)
+
+    cmap = matplotlib.cm.gray_r
+    cmap.set_bad('#b5d1ff', 1.)
+
+    ims = plt.imshow(sbmap_masked, vmin=vmin, vmax=vmax, interpolation='nearest',
+                     origin='lower', cmap=cmap)
 
     plt.xticks([])
     plt.yticks([])
