@@ -295,6 +295,21 @@ def sky_brightness_plot(sbmap, exp, outdir):
     ax = plt.gca()
     cbar.ax.set_ylabel('V mag per sq asec')
 
-    plt.savefig('sky_brightness_map.png', bbox_inches='tight')
+    assert(os.path.exists(outdir))
+
+    basename = (os.path.split(exp.fname_im))[-1]
+
+    outname = basename.replace('.fits', '-sbmap.png')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    plt.savefig(outname_tmp, bbox_inches='tight', format='png')
 
     plt.cla()
+
+    os.rename(outname_tmp, outname)
