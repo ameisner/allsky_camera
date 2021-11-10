@@ -892,6 +892,8 @@ def r_pix_to_zd(r_pix):
     # these special numbers need to be factored out
     icoeff = [-0.0016925985, 0.14376865, -1.3883376e-5, 1.7793004e-8]
 
+    icoeff.reverse() # polyval wants coefficients sorted by decreasing order...
+
     zd_deg = np.polyval(icoeff, r_pix)
 
     zd_deg = np.maximum(zd_deg, 0)
@@ -924,7 +926,7 @@ def pixel_solid_angle(zd_deg):
     area = (zd_deg/r_pix)*(1.0/dr_dzd) # sq deg
 
     # are these special handling steps for being at/near zenith necessary?
-    area_zenith =  (90.0/par['horizon_radius_pix'])**2 # sq deg
+    area_zenith = (90.0/par['horizon_radius_pix'])**2 # sq deg
     area[r_pix <= 0] = area_zenith
 
     area_sq_arcmin = area*(60.0**2) # square arcminutes
