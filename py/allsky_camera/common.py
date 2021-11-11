@@ -8,43 +8,42 @@ various other places throughout the codebase.
 Goal is to factor out special numbers.
 """
 
-def ac_params():
+import yaml
+from pkg_resources import resource_filename
+import os
+
+def ac_params(camera='MDM', verbose=False):
     """
     Provide a dictionary of various special numbers and other parameters
 
-    Returns:
-        dictionary of parameters
+    Parameters
+    ----------
+        camera : str (optional)
+            Name of specific all-sky camera. For now only 'MDM', the default,
+            is supported.
+        verbose : bool (optional)
+            Whether or not to issue a printout about the YAML file name.
+
+
+    Returns
+    -------
+        par : dict
+            Dictionary of parameters.
 
     Notes:
-        The values here apply to the MDM all-sky camera sample FITS readouts 
-        from 2020 October. In the future this function be generalized via
-        keyword argument or similar to handle multiple different all-sky
-        camera setups.
+        Need to think about the right way to avoid repeatedly reading
+        in the YAML file within each end-to-end pipeline run.
 
     """
 
-    # may want to include astrometric solution parameters here as well
+    fname_camera = resource_filename('allsky_camera',
+                                     os.path.join('data', camera + '.yaml'))
 
-    # camera-specific parameters
-    par_camera = {'nx': 1600,
-                  'ny': 1200,
-                  'bitpix': 8,
-                  'raw_satur_val': 255,
-                  'exptime_card': 'EXPOSURE',
-                  'static_mask_filename': 'static_badpix_mask.fits.gz',
-                  'off_region_xmin': 1450,
-                  'off_region_xmax': 1600,
-                  'off_region_ymin': 1075,
-                  'off_region_ymax': 1200,
-                  'x_zenith_pix' :  802.37891,
-                  'y_zenith_pix' : 511.35899,
-                  'rot_deg' : 3.5506619,
-                  'coeff2' : 0.0048194290,
-                  'coeff3' : -4.3659004e-5,
-                  'horizon_radius_pix' : 626.05372,
-                  'aper_phot_objrad' : 2.0,
-                  'annulus_radii' : [5.0, 10.0],
-                  'zp_adu_per_s' : 5.66}
+    if verbose:
+        print('READING ' + fname_camera)
+
+    with open(fname_camera, 'r') as stream:
+        par_camera = yaml.safe_load(stream)
 
     # miscellaneous parameters not tied to a particular camera
     par_misc = {'jd_minus_mjd' : 2400000.5,
@@ -56,4 +55,5 @@ def ac_params():
                 'pressure_bars' : 1.013,
                 'iso_thresh_deg': 0.3}
 
-    return dict(par_camera, **par_misc)
+    par = dict(par_camera, **par_misc)
+    return par
