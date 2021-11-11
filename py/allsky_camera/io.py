@@ -15,6 +15,7 @@ import matplotlib
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pkg_resources import resource_filename
+import copy
 
 def load_static_badpix():
     """
@@ -296,7 +297,7 @@ def sky_brightness_plot(sbmap, exp, outdir):
 
     sbmap_masked = np.ma.masked_where(np.logical_not(np.isfinite(sbmap)), sbmap)
 
-    cmap = matplotlib.cm.gray_r
+    cmap = copy.copy(matplotlib.cm.get_cmap("gray_r"))
     cmap.set_bad('#b5d1ff', 1.)
 
     ims = plt.imshow(sbmap_masked, vmin=vmin, vmax=vmax, interpolation='nearest',
