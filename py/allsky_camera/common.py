@@ -47,8 +47,7 @@ def ac_params():
                   'zp_adu_per_s' : 5.66}
 
     # miscellaneous parameters not tied to a particular camera
-    par_misc = {'meta_env_var': 'ALLSKY_CAMERA_META',
-                'jd_minus_mjd' : 2400000.5,
+    par_misc = {'jd_minus_mjd' : 2400000.5,
                 'bsc_filename' : 'bsc5.fits',
                 'bsc_filename_csv' : 'bsc5.csv',
                 'kpno_lon' : -111.5997,

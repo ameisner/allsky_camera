@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from pkg_resources import resource_filename
 
 def load_static_badpix():
     """
@@ -26,8 +27,9 @@ def load_static_badpix():
     """
     par = common.ac_params()
 
-    fname = os.path.join(os.environ[par['meta_env_var']],
-                         par['static_mask_filename'])
+    fname = resource_filename('allsky_camera', os.path.join('data', par['static_mask_filename']))
+
+    print('READING ' + fname)
 
     assert(os.path.exists(fname))
 
@@ -47,8 +49,9 @@ def load_bsc():
 
     par = common.ac_params()
 
-    fname = os.path.join(os.environ[par['meta_env_var']],
-                     par['bsc_filename_csv'])
+    fname = resource_filename('allsky_camera', os.path.join('data', par['bsc_filename_csv']))
+
+    print('READING ' + fname)
 
     assert(os.path.exists(fname))
 
