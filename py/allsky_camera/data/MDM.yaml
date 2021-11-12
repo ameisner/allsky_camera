@@ -1,33 +1,50 @@
+# detector number of pixels in x direction
 nx: 1600
+# detector number of pixels in y direction
 ny: 1200
 
+# dynamic range of image pixel values
 bitpix: 8
 
+# maximum possible raw image pixel value
 raw_satur_val: 255
 
+# raw data header card name for exposure time
 exptime_card: EXPOSURE
 
+# file name for static bad pixel mask
 static_mask_filename: static_badpix_mask.fits.gz
 
+# boundaries of rectangular region used for estimating dark
+# plus bias background level
 off_region_xmin: 1450
 off_region_xmax: 1600
 off_region_ymin: 1075
 off_region_ymax: 1200
 
+# zenith pixel coordinates according to astrometric model
 x_zenith_pix: 802.37891
 y_zenith_pix: 511.35899
 
+# rotation of +Y image axis relative to north, in degrees
 rot_deg: 3.5506619
 
+# second and third order coefficients in the transformation from
+# zenith distance in degrees to zenith distance in image pixels
 coeff2: 0.0048194290
 coeff3: -4.3659004e-5
 
+# radius in pixels of the horizon relative to zenith
 horizon_radius_pix: 626.05372
 
+# aperture photometry radius in image pixels
 aper_phot_objrad: 2.0
 
+# aperture photometry inner and outer radii in image pixels
 annulus_radii:
   - 5.0
   - 10.0
 
+# nominal clear-sky zeropoint for a point source with aperture
+# flux of 1 ADU/second
 zp_adu_per_s: 5.66
