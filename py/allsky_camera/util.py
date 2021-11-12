@@ -890,12 +890,9 @@ def r_pix_to_zd(r_pix):
         Need to think more about apparent versus true zenith distance...
     """
 
-    # these special numbers need to be factored out
-    icoeff = [-0.0016925985, 0.14376865, -1.3883376e-5, 1.7793004e-8]
+    par = common.ac_params()
 
-    icoeff.reverse() # polyval wants coefficients sorted by decreasing order...
-
-    zd_deg = np.polyval(icoeff, r_pix)
+    zd_deg = np.polyval(par['icoeff'], r_pix)
 
     zd_deg = np.maximum(zd_deg, 0)
 
