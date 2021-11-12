@@ -954,13 +954,11 @@ def sky_brightness_map(detrended, exptime):
 
     assert(len(sh) == 2)
 
-    # median filter square kernel sidelength, in pixels
-    # should probably extract this to common.ac_params list of special numbers at some point
-    ksize = 23
+    par = common.ac_params()
 
     print('Computing median filtered version of the detrended image...')
     t0 = time.time()
-    med = median_filter(detrended, ksize)
+    med = median_filter(detrended, par['ksize'])
     dt = time.time() - t0
     print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
 

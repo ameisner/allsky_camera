@@ -58,3 +58,6 @@ annulus_radii:
 # nominal clear-sky zeropoint for a point source with aperture
 # flux of 1 ADU/second
 zp_adu_per_s: 5.66
+
+# kernel size for sky brightness map median filter, in pixels
+ksize: 23
