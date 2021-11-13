@@ -11,7 +11,7 @@ def ind_split_image(im, nchunks, ksize=23, axis=1):
     Parameters
     ----------
         im : numpy.ndarray
-            2D image.
+            2D image as a numpy array.
         nchunks : int
             Number of chunks into which to split the image along axis.
         ksize : int (optional)
@@ -77,10 +77,38 @@ def ind_split_image(im, nchunks, ksize=23, axis=1):
 
     return starts, ends
 
-def split_and_reassemble(im, nchunks=2, ksize=23, nmp=2):
+def split_and_reassemble(im, nchunks=2, ksize=23, nmp=None):
+    """
+
+    Parameters
+    ----------
+        im : numpy.ndarray
+            2D image as a numpy array.
+        nchunks : int (optional)
+            Number of chunks into which to split the image along axis.
+        ksize : int (optional)
+            Median filter kernel size (sidelength of square kernel,
+            in units of pixels) that will be applied downstream.
+        nmp : int (optional)
+            Number of threads for multiprocessing. Defaults to be
+            the same as the number of image chunks requested. Should
+            not be larger than the number of threads available on
+            the machine being used.
+
+    Returns
+    -------
+        stitched : numpy.ndarray
+            2D image with same dimensions as input im, median filtered
+            according to ksize kernel sidelength parameter.
+
+    Notes
+    -----
+        Do I want to insist that ksize be an odd integer?
+
+    """
 
 
-    # this is unfortunately hardcoded for now
+    # axis is unfortunately hardcoded for now
     # would be nice to generalize this to work for either
     # axis, but would require some changes to how the
     # indexing is treated below. Could also accomplish with
@@ -88,6 +116,9 @@ def split_and_reassemble(im, nchunks=2, ksize=23, nmp=2):
     axis = 1
     sh = im.shape
     assert(len(sh) == 2)
+
+    if nmp is None:
+        nmp = nchunks
 
     assert(nmp > 1)
     assert(nmp <= multiprocessing.cpu_count())
