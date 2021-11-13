@@ -23,6 +23,7 @@ from astropy.time import Time
 import allsky_camera.starcat as starcat
 from scipy.ndimage import median_filter
 import time
+import allsky_camera.analysis.medfilt_parallel as medfilt_parallel
 
 def load_exposure_image(fname):
     """
@@ -932,7 +933,7 @@ def pixel_solid_angle(zd_deg):
 
     return area_sq_arcmin
 
-def sky_brightness_map(detrended, exptime):
+def sky_brightness_map(detrended, exptime, nmp=None):
     """
     Make a map of sky magnitude per square arcsecond.
 
@@ -942,6 +943,8 @@ def sky_brightness_map(detrended, exptime):
             2D numpy array representing the detrended all-sky camera image.
         exptime : float
             Exposure time in seconds.
+        nmp: int
+            Number of threads for multiprocessing.
 
     Returns
     -------
@@ -957,11 +960,14 @@ def sky_brightness_map(detrended, exptime):
 
     par = common.ac_params()
 
-    print('Computing median filtered version of the detrended image...')
-    t0 = time.time()
-    med = median_filter(detrended, par['ksize'])
-    dt = time.time() - t0
-    print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
+    if (nmp is None) or (nmp == 1):
+        print('Computing median filtered version of the detrended image...')
+        t0 = time.time()
+        med = median_filter(detrended, par['ksize'])
+        dt = time.time() - t0
+        print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
+    else:
+        med = medfilt_parallel.split_and_reassemble(detrended, nchunks=nmp, ksize=par['ksize'], nmp=nmp)
 
     par = common.ac_params()
 

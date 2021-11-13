@@ -62,7 +62,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     bsc = util.ac_catalog(exp)
 
     if not skip_sbmap:
-        sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds)
+        sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds, nmp=nmp)
 
     if write_outputs:
         if not os.path.exists(outdir):

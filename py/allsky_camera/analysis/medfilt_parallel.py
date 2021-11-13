@@ -104,6 +104,7 @@ def split_and_reassemble(im, nchunks=2, ksize=23, nmp=None):
     Notes
     -----
         Do I want to insist that ksize be an odd integer?
+        Can only split into chunks segmented along the x axis for now.
 
     """
 
@@ -133,6 +134,7 @@ def split_and_reassemble(im, nchunks=2, ksize=23, nmp=None):
 
     args = [(im[:, starts_pad[i]:ends_pad[i]], ksize) for i in range(nchunks)]
 
+    print('Splitting image into ' + str(nmp) + ' chunks prior to median filter')
     p = Pool(nmp)
 
     t0 = time.time()
