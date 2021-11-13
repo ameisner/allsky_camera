@@ -90,7 +90,7 @@ def get_exptime(h_im):
 
 def check_image_dimensions(image):
     """
-    Check that raw all-sky camera image are as expected (image not malformed)
+    Check that raw all-sky camera image dimensions are as expected (image not malformed)
 
     Parameters
     ----------
@@ -478,7 +478,7 @@ def zenith_radius_pix(x_pix, y_pix):
     dx_pix = x_pix - par['x_zenith_pix']
     dy_pix = y_pix - par['y_zenith_pix']
 
-    radius_pix = np.sqrt(dx_pix**2 + dy_pix**2)
+    radius_pix = np.hypot(dx_pix, dy_pix)
 
     return radius_pix
 
@@ -827,11 +827,12 @@ def ac_catalog(exp):
 
     r_pix = zenith_radius_pix(bsc['x'], bsc['y'])
 
-    bsc = bsc[r_pix <= 500] # factor out 500 special number...
+    par = common.ac_params()
+
+    bsc = bsc[r_pix <= par['r_pix_safe']]
 
     assert(len(bsc) > 0)
 
-    par = common.ac_params()
     # isolation criterion
     bsc = bsc[bsc['BSC_NEIGHBOR_DEG'] > par['iso_thresh_deg']]
 
@@ -970,8 +971,7 @@ def sky_brightness_map(detrended, exptime):
 
     zd_deg = r_pix_to_zd(r_pix)
 
-    # again this '500' pixel radius special number...
-    zd_deg[r_pix > 500] = np.nan
+    zd_deg[r_pix > par['r_pix_safe']] = np.nan
 
     sq_arcmin = pixel_solid_angle(zd_deg)
 

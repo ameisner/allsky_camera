@@ -61,3 +61,7 @@ zp_adu_per_s: 5.66
 
 # kernel size for sky brightness map median filter, in pixels
 ksize: 23
+
+# maximum zenith radius in image pixels within which
+# you can safely assume to be imaging the sky
+r_pix_safe: 500
