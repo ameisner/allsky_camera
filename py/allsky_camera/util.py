@@ -608,6 +608,9 @@ def ac_aper_phot(_im, x, y, bg_sigclip=False):
             Dataframe encapsulating the photometry results.
     """
 
+    print('Attempting to perform aperture photometry...')
+    t0 = time.time()
+
     assert(len(x) == len(y))
 
     x = np.array(x)
@@ -661,6 +664,8 @@ def ac_aper_phot(_im, x, y, bg_sigclip=False):
 
     cat['flux_adu'] = flux_adu
 
+    dt = time.time()-t0
+    print('Done with aperture photometry...took ' + '{:.2f}'.format(dt) + ' seconds')
     return cat
 
 def get_moon_position(mjd):
