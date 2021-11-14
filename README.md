@@ -52,3 +52,5 @@ The list of outputs produced is:
       --skip_checkplots     don't create checkplots
       --skip_sbmap          don't do sky brightness map
       --write_sbmap         write sky brightness map as FITS image
+      --force_mp_centroiding
+                            use multiprocessing for recentroiding

@@ -859,7 +859,7 @@ def ac_phot(exp, cat):
 
     return cat
 
-def ac_catalog(exp, nmp=None):
+def ac_catalog(exp, nmp=None, force_mp_centroiding=False):
     """
     Driver to perform bright star catalog recentroiding and aperture photometry.
 
@@ -872,6 +872,13 @@ def ac_catalog(exp, nmp=None):
             Number of threads for multiprocessing. Default is None,
             which means that multiprocessing will not be used. Gets passed
             on to the recentroiding step.
+        force_mp_centroiding : bool, optional
+            When multiprocessing has been requested via nmp > 1,
+            this boolean dictates whether to use multiprocessing
+            for recentroiding. Default is False, as there are
+            indications that (at least for nmp=2), the
+            image serialization overhead makes parallelization
+            of centroid refinement a net loss.
 
     Returns
     -------
@@ -884,7 +891,8 @@ def ac_catalog(exp, nmp=None):
     sc = starcat.StarCat()
     bsc = sc.cat_with_pixel_coords(exp.mjd)
 
-    centroids = ac_recentroid(exp.detrended, bsc['x'], bsc['y'], nmp=nmp)
+    centroids = ac_recentroid(exp.detrended, bsc['x'], bsc['y'],
+                              nmp=(nmp if force_mp_centroiding else None))
 
     assert(len(centroids) == len(bsc))
     assert(np.all(bsc.index == centroids.index))
