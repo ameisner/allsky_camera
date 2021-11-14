@@ -108,12 +108,6 @@ def write_sbmap(exp, sbmap, outdir):
         outdir : str
                  Full path of output directory.
 
-    Notes
-    -----
-        Would be good to encode some information about
-        the units (V mag per square arcsecond) in the
-        FITS header.
-
     """
 
     print('Attempting to write surface brightness map image output')
@@ -131,7 +125,10 @@ def write_sbmap(exp, sbmap, outdir):
     assert(not os.path.exists(outname))
     assert(not os.path.exists(outname_tmp))
 
-    hdu = fits.PrimaryHDU(sbmap.astype('float32'), header=exp.header)
+    header = exp.header
+    header['BUNIT'] = 'V mag per sq asec'
+
+    hdu = fits.PrimaryHDU(sbmap.astype('float32'), header=header)
     hdu.writeto(outname_tmp)
     os.rename(outname_tmp, outname)
 
