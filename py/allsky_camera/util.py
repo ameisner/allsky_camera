@@ -24,6 +24,8 @@ import allsky_camera.starcat as starcat
 from scipy.ndimage import median_filter
 import time
 import allsky_camera.analysis.medfilt_parallel as medfilt_parallel
+from multiprocessing import Pool
+import multiprocessing
 
 def load_exposure_image(fname):
     """
@@ -391,13 +393,13 @@ def in_image_mask(x, y):
 
     return mask
 
-def ac_recentroid(_im, x, y):
+def recentroid_1chunk(im, x, y):
     """"
-    Refine centroids relative to initial guess.
+    Refine a list of centroids relative to initial guess.
 
     Parameters
     ----------
-        _im : numpy.ndarray
+        im : numpy.ndarray
             Detrended all-sky camera image. Should be floating point, though
             this is also ensured within this function itself.
 
@@ -414,17 +416,10 @@ def ac_recentroid(_im, x, y):
 
     Notes
     -----
-        x and y need to have the same length. In my convention, a 2D numpy 
+        x and y need to have the same length. In my convention, a 2D numpy
         array representing an image is indexed as [y, x].
 
     """
-
-    t0 = time.time()
-    print('Refining bright star centroids')
-
-    im = _im.astype(float)
-
-    assert(len(x) == len(y))
 
     n = len(x)
 
@@ -451,6 +446,66 @@ def ac_recentroid(_im, x, y):
     result['qmaxshift'] = qmaxshift
 
     result['centroid_shift_flag'] = (np.abs(result['x_shift']) > cmaxshift) | (np.abs(result['y_shift']) > cmaxshift) | (qmaxshift != 0)
+
+    return result
+
+def ac_recentroid(_im, x, y, nmp=None):
+    """"
+    Driver for refining centroids relative to initial guess.
+
+    Parameters
+    ----------
+        _im : numpy.ndarray
+            Detrended all-sky camera image. Should be floating point, though
+            this is also ensured within this function itself.
+
+        x : numpy.ndarray
+            List of x pixel values for initial centroid guesses.
+
+        y : numpy.ndarray
+            List of y pixel values for initial centroid guesses.
+
+        nmp : int (optional)
+            Number of threads for multiprocessing. Default is None,
+            which means that multiprocessing will not be used.
+
+    Returns
+    -------
+        result : pandas.core.frame.DataFrame
+            Columns include xcentroid, ycentroid - the refine centroids.
+
+    Notes
+    -----
+        x and y need to have the same length. In my convention, a 2D numpy
+        array representing an image is indexed as [y, x].
+
+        It appears that nmp=2 may actually be slower than no multiprocessing
+        due to serialization overhead (may depend on the machine being used).
+
+    """
+
+    t0 = time.time()
+    print('Refining bright star centroids')
+
+    im = _im.astype('float32')
+
+    assert(len(x) == len(y))
+
+    if (nmp is None) or (nmp == 1):
+        result = recentroid_1chunk(im, x, y)
+    else:
+        print('Running parallelized recentroiding...')
+        p = Pool(nmp)
+        xy = pd.DataFrame()
+        xy['x'] = x
+        xy['y'] = y
+        dfs = np.array_split(xy, nmp)
+        args = [(im, np.array(_df['x']), np.array(_df['y'])) for _df in dfs]
+        results = p.starmap(recentroid_1chunk, args)
+        result = pd.concat(results, axis=0)
+        result.reset_index(drop=True, inplace=True)
+        p.close()
+        p.join()
 
     dt = time.time()-t0
     print('Centroid refinement took ' + '{:.2f}'.format(dt) + ' seconds')
@@ -803,7 +858,7 @@ def ac_phot(exp, cat):
 
     return cat
 
-def ac_catalog(exp):
+def ac_catalog(exp, nmp=None):
     """
     Driver to perform bright star catalog recentroiding and aperture photometry.
 
@@ -811,6 +866,11 @@ def ac_catalog(exp):
     ----------
         exp : allsky_camera.exposure.AC_exposure
             All-sky camera exposure object for the image being analyzed.
+
+        nmp : int (optional)
+            Number of threads for multiprocessing. Default is None,
+            which means that multiprocessing will not be used. Gets passed
+            on to the recentroiding step.
 
     Returns
     -------
@@ -823,7 +883,7 @@ def ac_catalog(exp):
     sc = starcat.StarCat()
     bsc = sc.cat_with_pixel_coords(exp.mjd)
 
-    centroids = ac_recentroid(exp.detrended, bsc['x'], bsc['y'])
+    centroids = ac_recentroid(exp.detrended, bsc['x'], bsc['y'], nmp=nmp)
 
     assert(len(centroids) == len(bsc))
     assert(np.all(bsc.index == centroids.index))

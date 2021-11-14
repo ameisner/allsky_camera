@@ -69,7 +69,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     # pixel-level detrending
     util.detrend_ac(exp)
 
-    bsc = util.ac_catalog(exp)
+    bsc = util.ac_catalog(exp, nmp=nmp)
 
     if not skip_sbmap:
         sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds, nmp=nmp)

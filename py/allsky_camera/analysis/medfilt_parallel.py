@@ -143,6 +143,7 @@ def split_and_reassemble(im, nchunks=2, ksize=23, nmp=None):
     print('ending parallelized median filter...took ', time.time()-t0, ' seconds')
 
     p.close()
+    p.join()
 
     for i in range(nchunks):
         chunk = med_chunks[i]
