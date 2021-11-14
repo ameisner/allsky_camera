@@ -14,6 +14,7 @@ import astropy.units as u
 import allsky_camera.common as common
 import copy
 import pandas as pd
+import numpy as np
 
 class StarCat:
     """
@@ -98,8 +99,8 @@ class StarCat:
 
         result = copy.deepcopy(self.catalog)
 
-        result['alt_deg'] = [aa.alt.deg for aa in altaz]
-        result['az_deg'] = [aa.az.deg for aa in altaz]
+        result['alt_deg'] = np.array(altaz.alt, dtype='float')
+        result['az_deg'] = np.array(altaz.az, dtype='float')
         result['mjd'] = mjd
 
         if horizon_cut:
