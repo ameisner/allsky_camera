@@ -63,9 +63,9 @@ def load_bsc():
 
     return df
 
-def write_image_level_outputs(exp, outdir):
+def write_detrended(exp, outdir):
     """
-    Write image level outputs, such as the detrended all-sky camera image.
+    Write the detrended all-sky camera image.
 
     Parameters
     ----------
@@ -74,13 +74,9 @@ def write_image_level_outputs(exp, outdir):
         outdir : str
                  Full path of output directory.
 
-    Notes
-    -----
-        Currently this only writes out a detrended image. Perhaps in the future
-        there could also be an image-level bitmask written out.
     """
 
-    print('Attempting to write image level outputs')
+    print('Attempting to write detrended image output file')
 
     assert(os.path.exists(outdir))
 
@@ -96,6 +92,46 @@ def write_image_level_outputs(exp, outdir):
     assert(not os.path.exists(outname_tmp))
 
     hdu = fits.PrimaryHDU(exp.detrended.astype('float32'), header=exp.header)
+    hdu.writeto(outname_tmp)
+    os.rename(outname_tmp, outname)
+
+def write_sbmap(exp, sbmap, outdir):
+    """
+    Write the sky brightness map as a FITS image file.
+
+    Parameters
+    ----------
+        exp    : allsky_camera.exposure.AC_exposure
+                 All-sky camera exposure object.
+        sbmap  : numpy.ndarray
+                 2D image of the sky brightness.
+        outdir : str
+                 Full path of output directory.
+
+    Notes
+    -----
+        Would be good to encode some information about
+        the units (V mag per square arcsecond) in the
+        FITS header.
+
+    """
+
+    print('Attempting to write surface brightness map image output')
+
+    assert(os.path.exists(outdir))
+
+    outname = (os.path.split(exp.fname_im))[-1]
+
+    outname = outname.replace('.fits', '-sbmap.fits')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    hdu = fits.PrimaryHDU(sbmap.astype('float32'), header=exp.header)
     hdu.writeto(outname_tmp)
     os.rename(outname_tmp, outname)
 
