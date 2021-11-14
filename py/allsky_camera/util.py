@@ -968,17 +968,6 @@ def sky_brightness_map(detrended, exptime, nmp=None):
 
     par = common.ac_params()
 
-    if (nmp is None) or (nmp == 1):
-        print('Computing median filtered version of the detrended image...')
-        t0 = time.time()
-        med = median_filter(detrended, par['ksize'])
-        dt = time.time() - t0
-        print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
-    else:
-        med = medfilt_parallel.split_and_reassemble(detrended, nchunks=nmp, ksize=par['ksize'], nmp=nmp)
-
-    par = common.ac_params()
-
     ybox, xbox = np.mgrid[0:par['ny'], 0:par['nx']]
 
     r_pix = zenith_radius_pix(xbox, ybox)
@@ -986,6 +975,34 @@ def sky_brightness_map(detrended, exptime, nmp=None):
     zd_deg = r_pix_to_zd(r_pix)
 
     zd_deg[r_pix > par['r_pix_safe']] = np.nan
+
+    n_rows_good = np.sum(r_pix <= par['r_pix_safe'], axis=0)
+
+    good_col_indices = np.where(n_rows_good > 0)
+
+    npix_pad = (par['ksize'] // 2) + 1
+    ind_l = np.min(good_col_indices) - npix_pad
+    ind_u = np.max(good_col_indices) + 1 + npix_pad
+
+    ind_l = max(ind_l, 0)
+    ind_u = min(ind_u, par['nx'])
+
+    detrended_subimage = detrended[:, ind_l:ind_u]
+
+    if (nmp is None) or (nmp == 1):
+        print('Computing median filtered version of the detrended image...')
+        t0 = time.time()
+        med_subimage = median_filter(detrended_subimage, par['ksize'])
+        dt = time.time() - t0
+        print('Done computing median filtered image...took ' + '{:.2f}'.format(dt) + ' seconds')
+    else:
+        med_subimage = medfilt_parallel.split_and_reassemble(detrended_subimage,
+                                                    nchunks=nmp, ksize=par['ksize'],
+                                                    nmp=nmp)
+
+    med = np.zeros((par['ny'], par['nx']), dtype=float) + np.nan
+
+    med[:, ind_l:ind_u] = med_subimage
 
     sq_arcmin = pixel_solid_angle(zd_deg)
 
