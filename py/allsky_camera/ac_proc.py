@@ -14,6 +14,7 @@ import os
 from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
+import multiprocessing
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
@@ -63,6 +64,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         print('Could not retrieve hostname!')
 
     assert(os.path.exists(fname_in))
+
+    if nmp is not None:
+        assert(nmp <= multiprocessing.cpu_count())
 
     exp = AC_exposure(fname_in)
 

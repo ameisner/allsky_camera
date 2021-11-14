@@ -494,6 +494,7 @@ def ac_recentroid(_im, x, y, nmp=None):
     if (nmp is None) or (nmp == 1):
         result = recentroid_1chunk(im, x, y)
     else:
+        assert (nmp <= multiprocessing.cpu_count())
         print('Running parallelized recentroiding...')
         p = Pool(nmp)
         xy = pd.DataFrame()
