@@ -419,6 +419,7 @@ def ac_recentroid(_im, x, y):
 
     """
 
+    t0 = time.time()
     print('Refining bright star centroids')
 
     im = _im.astype(float)
@@ -451,6 +452,8 @@ def ac_recentroid(_im, x, y):
 
     result['centroid_shift_flag'] = (np.abs(result['x_shift']) > cmaxshift) | (np.abs(result['y_shift']) > cmaxshift) | (qmaxshift != 0)
 
+    dt = time.time()-t0
+    print('Centroid refinement took ' + '{:.2f}'.format(dt) + ' seconds')
     return result
 
 def zenith_radius_pix(x_pix, y_pix):
