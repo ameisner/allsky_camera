@@ -9,6 +9,17 @@ import allsky_camera.ac_proc as pipeline
 files_processed = []
 
 def _reduce_new_files(flist_fits, outdir='.'):
+    """
+    Run reductions of new raw all-sky camera images.
+
+    Parameters
+    ----------
+        flist_fits : list
+            List of file names (full paths) for which to run the reduction pipeline.
+        outdir : str (optional)
+            Directory in which to write outputs.
+
+    """
 
     for f_fits in flist_fits:
 
@@ -25,7 +36,18 @@ def _reduce_new_files(flist_fits, outdir='.'):
         except:
             print('PROCESSING FAILURE: ' + f_fits)
 
-def _proc_new_files(data_dir, outdir='.'):
+def detect_new_files(data_dir, outdir='.'):
+    """
+    Detect and keep track of files that have not been previously processed.
+
+    Parameters
+    ----------
+        data_dir : str
+            Full path of raw data directory.
+        outdir : str (optional)
+            Directory in which to write outputs.
+
+    """
 
     print('Checking for new .fits files...')
 
@@ -50,13 +72,36 @@ def _proc_new_files(data_dir, outdir='.'):
         files_processed = files_processed + flist_fits_new
 
 def _watch(data_dir, wait_seconds=5, outdir='.'):
+    """
+    Watch raw data directory for new FITS image files to process.
+
+    Parameters
+    ----------
+        data_dir :  str
+            Name of directory to watch for new FITS image files.
+        wait_seconds : float (optional)
+            Polling interval in seconds (default is 5 seconds).
+        outdir : str (optional)
+            Directory in which to write the outputs.
+
+    """
 
     while True:
         print('Waiting', wait_seconds, ' seconds')
         time.sleep(wait_seconds)
-        _proc_new_files(data_dir, outdir=outdir)
+        detect_new_files(data_dir, outdir=outdir)
 
 def _do_veto(fname):
+    """
+    Veto any further processing of a list of previously processed files.
+
+    Parameters
+    ----------
+        fname : str
+            File name with list of files to exclude from processing.
+            Should be an ASCII file with one file name (full path) per line.
+
+    """
     assert(os.path.exists(fname))
 
     global files_processed
