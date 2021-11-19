@@ -6,7 +6,6 @@ A class representing a bright star catalog.
 """
 
 import astropy.io.fits as fits
-import allsky_camera.util as util # needed?
 import allsky_camera.io as io
 from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
@@ -175,13 +174,14 @@ class StarCat:
 
         altaz = self.cat_with_altaz(mjd, horizon_cut=horizon_cut)
 
-        xy = util.altaz_to_xy(altaz['alt_deg'], altaz['az_deg'])
+        from allsky_camera.util import altaz_to_xy, in_image_mask
+        xy = altaz_to_xy(altaz['alt_deg'], altaz['az_deg'])
 
         result = pd.concat([altaz, xy], axis=1)
 
         if in_image_cut:
-            result = result[util.in_image_mask(result['x'],
-                                               result['y'])]
+            result = result[in_image_mask(result['x'],
+                                          result['y'])]
             result.reset_index(drop=True, inplace=True)
 
         return result
