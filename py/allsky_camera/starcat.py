@@ -37,12 +37,24 @@ class StarCat:
         self.add_healpix_indices()
 
     def add_healpix_indices(self):
+        """
+        Add columns for HEALPix indices to bright star catalog.
+
+        Notes
+        -----
+            Modifies self.catalog attribute by adding columns called
+            heal_ring_nside4 and heal_ring_nside8.
+
+        """
+
         try:
             import healpy
         except:
             print('Could not import healpy !!')
             return
 
+        # should these nside=4, 8 values be extracted to the
+        # configuration file of special numbers?
         for nside in [4, 8]:
             colname = 'heal_ring_nside' + str(nside)
             self.catalog[colname] = \
