@@ -41,15 +41,14 @@ class StarCat:
             import healpy
         except:
             print('Could not import healpy !!')
+            return
 
-        self.catalog['heal_ring_nside4'] = \
-            healpy.pixelfunc.ang2pix(4, self.catalog['RA'],
-                                     self.catalog['DEC'], nest=False,
-                                     lonlat=True)
-        self.catalog['heal_ring_nside8'] = \
-            healpy.pixelfunc.ang2pix(8, self.catalog['RA'],
-                                     self.catalog['DEC'], nest=False,
-                                     lonlat=True)
+        for nside in [4, 8]:
+            colname = 'heal_ring_nside' + str(nside)
+            self.catalog[colname] = \
+                healpy.pixelfunc.ang2pix(nside, self.catalog['RA'],
+                                         self.catalog['DEC'], nest=False,
+                                         lonlat=True)
 
     def compute_altaz(self, mjd):
         """
