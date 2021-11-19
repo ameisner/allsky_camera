@@ -29,7 +29,28 @@ class StarCat:
     """
     def __init__(self):
         self.catalog = io.load_bsc() # double check the function name here
-        
+
+        # could eventually just have these in the
+        # BSC CSV file. Computing on the fly may
+        # become desirable if/when proper motion
+        # corrections are incorporated
+        self.add_healpix_indices()
+
+    def add_healpix_indices(self):
+        try:
+            import healpy
+        except:
+            print('Could not import healpy !!')
+
+        self.catalog['heal_ring_nside4'] = \
+            healpy.pixelfunc.ang2pix(4, self.catalog['RA'],
+                                     self.catalog['DEC'], nest=False,
+                                     lonlat=True)
+        self.catalog['heal_ring_nside8'] = \
+            healpy.pixelfunc.ang2pix(8, self.catalog['RA'],
+                                     self.catalog['DEC'], nest=False,
+                                     lonlat=True)
+
     def compute_altaz(self, mjd):
         """
         Compute (altitude, azimuth) coords of the catalog at specified MJD.
