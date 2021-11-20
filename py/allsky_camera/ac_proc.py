@@ -18,7 +18,8 @@ import multiprocessing
 
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
-            write_sbmap=False, force_mp_centroiding=False):
+            write_sbmap=False, force_mp_centroiding=False,
+            dont_write_catalog=False):
     """
     Process one all-sky camera image.
 
@@ -51,6 +52,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             indications that (at least for nmp=2), the
             image serialization overhead makes parallelization
             of centroid refinement a net loss.
+        dont_write_catalog : bool, optional
+            Set True to skip writing of all-sky camera source catalog.
+            Default is False.
 
     Notes
     -----
@@ -86,10 +90,13 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds, nmp=nmp)
 
     if write_outputs:
+        # skip making output dir if all outputs have individually
+        # been switched off?
         if not os.path.exists(outdir):
             os.mkdir(outdir)
 
-        io.write_source_catalog(bsc, exp, outdir)
+        if not dont_write_catalog:
+             io.write_source_catalog(bsc, exp, outdir)
 
         if not dont_write_detrended:
             io.write_detrended(exp, outdir)
@@ -144,10 +151,15 @@ if __name__ == "__main__":
                         action='store_true',
                         help="use multiprocessing for recentroiding")
 
+    parser.add_argument('--dont_write_catalog', default=False,
+                        action='store_true',
+                        help="don't write source catalog FITS file")
+
     args = parser.parse_args()
 
     ac_proc(args.fname_in[0], outdir=args.outdir,
             dont_write_detrended=args.dont_write_detrended,
             nmp=args.multiproc, skip_checkplots=args.skip_checkplots,
             skip_sbmap=args.skip_sbmap, write_sbmap=args.write_sbmap,
-            force_mp_centroiding=args.force_mp_centroiding)
+            force_mp_centroiding=args.force_mp_centroiding,
+            dont_write_catalog=args.dont_write_catalog)
