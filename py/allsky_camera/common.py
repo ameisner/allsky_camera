@@ -11,7 +11,9 @@ Goal is to factor out special numbers.
 import yaml
 from pkg_resources import resource_filename
 import os
+from functools import lru_cache
 
+@lru_cache()
 def ac_params(camera='MDM', verbose=False):
     """
     Provide a dictionary of various special numbers and other parameters
@@ -31,8 +33,8 @@ def ac_params(camera='MDM', verbose=False):
             Dictionary of parameters.
 
     Notes:
-        Need to think about the right way to avoid repeatedly reading
-        in the YAML file within each end-to-end pipeline run.
+        Caches to avoid repeatedly reading in the YAML file within each
+        end-to-end pipeline run.
 
     """
 
