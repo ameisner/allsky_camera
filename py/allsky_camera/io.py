@@ -16,6 +16,7 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pkg_resources import resource_filename
 import copy
+from functools import lru_cache
 
 def load_static_badpix():
     """
@@ -38,6 +39,7 @@ def load_static_badpix():
 
     return mask
 
+@lru_cache()
 def load_bsc():
     """
     Load BSC5 catalog.
