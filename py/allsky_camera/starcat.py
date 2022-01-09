@@ -57,8 +57,8 @@ class StarCat:
         for nside in [4, 8]:
             colname = 'heal_ring_nside' + str(nside)
             self.catalog[colname] = \
-                healpy.pixelfunc.ang2pix(nside, self.catalog['RA'],
-                                         self.catalog['DEC'], nest=False,
+                healpy.pixelfunc.ang2pix(nside, np.array(self.catalog['RA']),
+                                         np.array(self.catalog['DEC']), nest=False,
                                          lonlat=True)
 
     def compute_altaz(self, mjd):

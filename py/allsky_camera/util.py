@@ -635,7 +635,7 @@ def _get_area_from_ap(ap):
 
     """
 
-    if (photutils.__version__.find('0.7') != -1) or (photutils.__version__.find('1.0') != -1) or (photutils.__version__.find('1.2') != -1):
+    if (photutils.__version__.find('0.7') != -1) or (photutils.__version__.find('1.0') != -1) or (photutils.__version__.find('1.2') != -1) or (photutils.__version__.find('1.3') != -1):
         area = ap.area # 0.7
     else:
         area = ap.area() # 0.6
@@ -790,7 +790,7 @@ def trim_catalog_moon(cat, mjd):
 
     thresh = 15.0 # degrees of Moon separation; factor out to ac_params?
 
-    trim['moon_sep_deg'] = ang_sep
+    trim['moon_sep_deg'] = np.array(ang_sep, dtype=float)
 
     trim = trim[ang_sep.deg > thresh]
 
@@ -822,8 +822,8 @@ def catalog_galactic_coords(cat):
     skycoords = SkyCoord(cat['RA']*u.deg, cat['DEC']*u.deg,
                          frame='icrs')
 
-    cat['lgal'] = skycoords.galactic.l
-    cat['bgal'] = skycoords.galactic.b
+    cat['lgal'] = np.array(skycoords.galactic.l, dtype=float)
+    cat['bgal'] = np.array(skycoords.galactic.b, dtype=float)
 
     return cat
 
