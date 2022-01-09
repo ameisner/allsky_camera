@@ -18,6 +18,7 @@ from pkg_resources import resource_filename
 import copy
 from functools import lru_cache
 
+@lru_cache()
 def load_static_badpix():
     """
     Read in static bad pixel mask.
