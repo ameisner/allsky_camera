@@ -406,6 +406,9 @@ def oplot_centroids(cat, exp, outdir):
 
     basename = (os.path.split(exp.fname_im))[-1]
 
+    title = basename + ' ; refined centroids overplotted'
+    plt.title(title)
+
     outname = basename.replace('.fits', '-detrended.png')
 
     outname = os.path.join(outdir, outname)
