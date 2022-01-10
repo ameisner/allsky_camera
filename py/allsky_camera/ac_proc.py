@@ -19,7 +19,7 @@ import multiprocessing
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
             write_sbmap=False, force_mp_centroiding=False,
-            dont_write_catalog=False):
+            dont_write_catalog=False, oplot_centroids=False):
     """
     Process one all-sky camera image.
 
@@ -55,6 +55,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         dont_write_catalog : bool, optional
             Set True to skip writing of all-sky camera source catalog.
             Default is False.
+        oplot_centroids : bool, optional
+            Set True to make and write out a checkplot overlaying bright
+            star centroids on the detrended image.
 
     Notes
     -----
@@ -109,6 +112,8 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             io.centroid_quiver_plot(bsc, exp, outdir)
             if not skip_sbmap:
                 io.sky_brightness_plot(sbmap, exp, outdir)
+            if oplot_centroids:
+                io.oplot_centroids(bsc, exp, outdir)
 
     dt = time.time()-t0
 
@@ -155,6 +160,10 @@ if __name__ == "__main__":
                         action='store_true',
                         help="don't write source catalog FITS file")
 
+    parser.add_argument('--oplot_centroids', default=False,
+                        action='store_true',
+                        help="checkplot overlaying centroids on detrended image")
+
     args = parser.parse_args()
 
     ac_proc(args.fname_in[0], outdir=args.outdir,
@@ -162,4 +171,5 @@ if __name__ == "__main__":
             nmp=args.multiproc, skip_checkplots=args.skip_checkplots,
             skip_sbmap=args.skip_sbmap, write_sbmap=args.write_sbmap,
             force_mp_centroiding=args.force_mp_centroiding,
-            dont_write_catalog=args.dont_write_catalog)
+            dont_write_catalog=args.dont_write_catalog,
+            oplot_centroids=args.oplot_centroids)

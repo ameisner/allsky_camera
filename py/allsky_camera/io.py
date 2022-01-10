@@ -363,5 +363,48 @@ def sky_brightness_plot(sbmap, exp, outdir):
     plt.savefig(outname_tmp, bbox_inches='tight', format='png')
 
     plt.cla()
+    plt.close()
+
+    os.rename(outname_tmp, outname)
+
+def oplot_centroids(cat, exp, outdir):
+    """
+    Overplot source catalog centroids on detrended image.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Bright star catalog with all-sky camera photometry. Needs to
+            have columns 'x', 'y', 'xcentroid', 'ycentroid'
+        exp : allsky_camera.exposure.AC_exposure
+            All-sky camera exposure object.
+        outdir : str
+            Full path of output directory.
+
+    """
+
+    plt.cla()
+
+    plt.imshow(exp.detrended, vmin=0, vmax=255, origin='lower',
+               interpolation='nearest', cmap='gray')
+
+    plt.xticks([])
+    plt.yticks([])
+
+    basename = (os.path.split(exp.fname_im))[-1]
+
+    outname = basename.replace('.fits', '-detrended.png')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    plt.savefig(outname_tmp, bbox_inches='tight', format='png', dpi=200)
+
+    plt.cla()
+    plt.close()
 
     os.rename(outname_tmp, outname)
