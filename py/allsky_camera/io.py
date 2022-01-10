@@ -17,6 +17,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pkg_resources import resource_filename
 import copy
 from functools import lru_cache
+from scipy.stats import scoreatpercentile
 
 @lru_cache()
 def load_static_badpix():
@@ -384,6 +385,15 @@ def oplot_centroids(cat, exp, outdir):
     """
 
     plt.cla()
+
+    par = common.ac_params()
+
+    import allsky_camera.util as util
+    mask = util.circular_mask(par['r_pix_safe'])
+
+    limits = scoreatpercentile(np.ravel(exp.detrended[mask]), [1, 97])
+    vmin = limits[0]
+    vmax = limits[1]
 
     plt.imshow(exp.detrended, vmin=0, vmax=255, origin='lower',
                interpolation='nearest', cmap='gray')

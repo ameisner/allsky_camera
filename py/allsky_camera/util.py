@@ -26,6 +26,7 @@ import time
 import allsky_camera.analysis.medfilt_parallel as medfilt_parallel
 from multiprocessing import Pool
 import multiprocessing
+from functools import lru_cache
 
 def load_exposure_image(fname):
     """
@@ -1087,3 +1088,42 @@ def sky_brightness_map(detrended, exptime, nmp=None):
     mag_per_sq_asec = -2.5 * np.log10(med) + par['zp_adu_per_s']
 
     return mag_per_sq_asec
+
+@lru_cache(maxsize=2)
+def circular_mask(radius_pix):
+    """
+    Create a boolean mask representing a circle centered at the image center.
+    Parameters
+    ----------
+        radius_pix : float
+            Radius value to use for the circular mask.
+    Returns
+    -------
+        mask : numpy.ndarray
+            Boolean mask as a 2D numpy array. True means that a pixel
+            location is within radius_pix pixels of the center.
+    Notes
+    -----
+        Possible speed-ups?
+        Generalize so that there can be a user-specified central coordinates?
+        Make radius_pix into an optional keyword arg that defaults to the size
+        of the on-sky image region?
+
+    """
+
+    par = common.ac_params()
+
+    sh = (par['ny'], par['nx'])
+
+    Y, X = np.ogrid[:par['ny'], :par['nx']]
+
+    x_center = par['x_zenith_pix']
+    y_center = par['y_zenith_pix']
+
+    dist = np.hypot(X - x_center, Y - y_center)
+
+    dist = dist.reshape(sh)
+
+    mask = (dist <= radius_pix)
+
+    return mask
