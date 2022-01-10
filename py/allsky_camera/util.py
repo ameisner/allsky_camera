@@ -904,6 +904,13 @@ def ac_catalog(exp, nmp=None, force_mp_centroiding=False):
 
     assert(len(bsc) > 0)
 
+    print('Attempting to flag wrong centroids...')
+    t0 = time.time()
+    # put in nmp optional multiprocessing later
+    bsc = flag_wrong_centroids(bsc, bsc)
+    dt = time.time()-t0
+    print('flagging wrong centroids took ', '{:.3f}'.format(dt), ' seconds')
+
     r_pix = zenith_radius_pix(bsc['x'], bsc['y'])
 
     par = common.ac_params()
@@ -1127,3 +1134,36 @@ def circular_mask(radius_pix):
     mask = (dist <= radius_pix)
 
     return mask
+
+def flag_wrong_centroids(cat, full_cat):
+    """
+    Flag cases of a centroid wandering off to an entirely different star.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Table with columns including xcentroid, ycentroid, SOURCE_ID. Can be a
+            subset of the rows for the entire pointing camera exposure's
+            catalog, with the idea being that partial lists can be run
+            in parallel to reduce run time.
+        full_cat : pandas.core.dataframe.DataFrame
+            Table with columns including x_gaia_guess, y_gaia_guess, SOURCE_ID.
+            Needs to be the full star catalog for this pointing camera exposure.
+    Returns
+    -------
+        cat : pandas.core.dataframe.DataFrame
+            Input catalog cat but with an added column called wrong_source_centroid,
+            which has a value of 1 (centroid has wandered too far) or 0.
+    """
+
+    wrong_source_centroid = np.zeros(len(cat), dtype=bool)
+
+    for i in range(len(cat)):
+        _dist = np.sqrt(np.power(full_cat['x'] - cat.iloc[i]['xcentroid'], 2) + \
+                        np.power(full_cat['y'] - cat.iloc[i]['ycentroid'], 2))
+        indmin = np.argmin(_dist)
+        wrong_source_centroid[i] = (full_cat.iloc[indmin]['MY_BSC_ID'] != cat.iloc[i]['MY_BSC_ID'])
+
+    cat['wrong_source_centroid'] = wrong_source_centroid.astype(int)
+
+    return cat
