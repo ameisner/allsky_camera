@@ -388,6 +388,9 @@ def oplot_centroids(cat, exp, outdir):
     plt.imshow(exp.detrended, vmin=0, vmax=255, origin='lower',
                interpolation='nearest', cmap='gray')
 
+    plt.scatter(cat['xcentroid'], cat['ycentroid'], s=5, edgecolor='r',
+                facecolor='none', linewidth=0.1)
+
     plt.xticks([])
     plt.yticks([])
 
@@ -402,7 +405,7 @@ def oplot_centroids(cat, exp, outdir):
     assert(not os.path.exists(outname))
     assert(not os.path.exists(outname_tmp))
 
-    plt.savefig(outname_tmp, bbox_inches='tight', format='png', dpi=200)
+    plt.savefig(outname_tmp, bbox_inches='tight', format='png', dpi=400)
 
     plt.cla()
     plt.close()
