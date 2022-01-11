@@ -27,6 +27,7 @@ import allsky_camera.analysis.medfilt_parallel as medfilt_parallel
 from multiprocessing import Pool
 import multiprocessing
 from functools import lru_cache
+from scipy.spatial import KDTree
 
 def load_exposure_image(fname):
     """
@@ -906,16 +907,7 @@ def ac_catalog(exp, nmp=None, force_mp_centroiding=False):
 
     print('Attempting to flag wrong centroids...')
     t0 = time.time()
-    if nmp is None:
-        bsc = flag_wrong_centroids(bsc, bsc)
-    else:
-        p = Pool(nmp)
-        parts = np.array_split(bsc, nmp)
-        args = [(_bsc, bsc) for _bsc in parts]
-        cats = p.starmap(flag_wrong_centroids, args)
-        bsc = pd.concat(cats)
-        p.close()
-        p.join()
+    bsc = flag_wrong_centroids_kdtree(bsc)
     dt = time.time()-t0
     print('flagging wrong centroids took ', '{:.3f}'.format(dt), ' seconds')
 
@@ -1150,7 +1142,7 @@ def flag_wrong_centroids(cat, full_cat):
     Parameters
     ----------
         cat : pandas.core.dataframe.DataFrame
-            Table with columns including xcentroid, ycentroid, SOURCE_ID. Can be a
+            Table with columns including xcentroid, ycentroid, MY_BSC_ID. Can be a
             subset of the rows for the entire pointing camera exposure's
             catalog, with the idea being that partial lists can be run
             in parallel to reduce run time.
@@ -1173,5 +1165,38 @@ def flag_wrong_centroids(cat, full_cat):
         wrong_source_centroid[i] = (full_cat.iloc[indmin]['MY_BSC_ID'] != cat.iloc[i]['MY_BSC_ID'])
 
     cat['wrong_source_centroid'] = wrong_source_centroid.astype(int)
+
+    return cat
+
+def flag_wrong_centroids_kdtree(cat):
+    """
+    Flag cases of a centroid wandering off to an entirely different star.
+
+    Parameters
+    ----------
+        cat : pandas.core.dataframe.DataFrame
+            Table with columns including xcentroid, ycentroid, MY_BSC_ID.
+
+    Returns
+    -------
+        cat : pandas.core.dataframe.DataFrame
+            Input catalog cat but with an added column called wrong_source_centroid,
+            which has a value of 1 (centroid has wandered too far) or 0.
+
+    Notes
+    -----
+        The idea is that using a KDTree should make this fast...
+
+    """
+
+    n = len(cat)
+
+    tree = KDTree(np.c_[cat['x'], cat['y']])
+
+    dists, inds = tree.query(np.array((cat['xcentroid'],cat['ycentroid'])).T, k=1)
+
+    inds = inds.reshape(n)
+
+    cat['wrong_source_centroid'] = (inds != np.arange(n)).astype(int)
 
     return cat
