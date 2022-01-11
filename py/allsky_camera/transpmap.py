@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 import time
+from multiprocessing import Pool
 
 def transpmap(lon, lat, transp, nside=32):
     """
@@ -26,7 +27,14 @@ def transpmap(lon, lat, transp, nside=32):
     Returns
     -------
         map : numpy.ndarray
-            HEALPix map as a 1-dimensional array.
+            HEALPix transparency map as a 1-dimensional array. NaN for missing data
+            (e.g., regions that are below the horizon).
+        tot : numpy.ndarray
+             HEALPix map of the accumulated sum of transparency measurements
+             (intermediate product).
+        wt : numpy.ndarray
+             HEALPix weight map proportional to number of stars effectively contributing
+             to each pixel.
 
     Notes
     -----
@@ -36,6 +44,7 @@ def transpmap(lon, lat, transp, nside=32):
 
     npix = 12*(nside**2)
     map = np.zeros(npix, dtype=float)
+    tot = np.zeros(npix, dtype=float)
     wt = np.zeros(npix, dtype=float)
     npoints = len(lon)
 
@@ -65,13 +74,81 @@ def transpmap(lon, lat, transp, nside=32):
         gaussian /= np.sum(gaussian) # normalize...
 
         wt += gaussian
-        map += gaussian*transp[i]
+        tot += gaussian*transp[i]
 
-    map = map / (wt + (wt == 0).astype(int))
+    map = tot / (wt + (wt == 0).astype(int))
 
     map[wt < 0.005] = np.nan
 
-    return map
+    return map, tot, wt
+
+def transpmap_parallel(lon, lat, transp, nside=32, nmp=None):
+    """
+    Build transparency map from a list of points and their transparencies.
+
+    Parameters
+    ----------
+        lon : numpy.ndarray
+            List of longitude data points, in degrees. Must have same
+            number of elements as lat.
+        lat : numpy.ndarray
+            List of latitude data points, in degrees. Must have same
+            number of elements as lon.
+        transp : numpy.ndarray
+            List of transparency values at (lon, lat). Must have same
+            number of elements as lon and lat arrays.
+        nside : int, optional
+            HEALPix nside parameter, default is nside=32 (1.83 deg pixels).
+        nmp : int, optional
+            Number of multiprocessing processes to use. Default of None means
+            that no multiprocessing will be used.
+
+    Returns
+    -------
+        map : numpy.ndarray
+            HEALPix transparency map as a 1-dimensional array. NaN for missing data
+            (e.g., regions that are below the horizon).
+        tot : numpy.ndarray
+             HEALPix map of the accumulated sum of transparency measurements
+             (intermediate product).
+        wt : numpy.ndarray
+             HEALPix weight map proportional to number of stars effectively contributing
+             to each pixel.
+
+    Notes
+    -----
+        Use ring-order HEALPix convention.
+        Basically a wrapper for the transpmap function.
+
+    """
+
+    t0 = time.time()
+    if (nmp == 1) or (nmp is None):
+        return transpmap(lon, lat, transp, nside=nside)
+    else:
+        p = Pool(nmp)
+        lons = np.array_split(lon, nmp)
+        lats = np.array_split(lat, nmp)
+        transps = np.array_split(transp, nmp)
+        args = [(lons[i], lats[i], transps[i], nside) for i in range(nmp)]
+        results = p.starmap(transpmap, args)
+
+        tot = results[0][1]
+        wt = results[0][2]
+        for i in range(1, nmp):
+            tot += results[i][1]
+            wt += results[i][2]
+
+        map = tot / (wt + (wt == 0).astype(int))
+
+        map[wt < 0.005] = np.nan
+
+        p.close()
+        p.join()
+
+    dt = time.time()-t0
+
+    return map, tot, wt
 
 def _test():
     t0 = time.time()
@@ -83,7 +160,9 @@ def _test():
 
     transp[lon < 180] *= 0.5
 
-    map = transpmap(lon, lat, transp)
+    #map, tot, wt = transpmap(lon, lat, transp)
+
+    map, tot, wt = transpmap_parallel(lon, lat, transp, nside=16, nmp=4)
 
     dt = time.time()-t0
     print(dt, ' seconds')
