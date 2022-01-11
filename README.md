@@ -35,7 +35,9 @@ The list of outputs produced is:
 # full help for running the pipeline
 
     allsky_camera/py/allsky_camera> python ac_proc.py --help
-    usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] [--skip_checkplots] [--skip_sbmap] [--write_sbmap] fname_in
+    usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] [--skip_checkplots] [--skip_sbmap] [--write_sbmap] [--force_mp_centroiding]
+                      [--dont_write_catalog] [--oplot_centroids]
+                      fname_in
 
     run the all-sky camera reduction pipeline on an exposure
 
@@ -54,3 +56,7 @@ The list of outputs produced is:
       --write_sbmap         write sky brightness map as FITS image
       --force_mp_centroiding
                             use multiprocessing for recentroiding
+      --force_mp_centroiding
+                            use multiprocessing for recentroiding
+      --dont_write_catalog  don't write source catalog FITS file
+      --oplot_centroids     checkplot overlaying centroids on detrended image
