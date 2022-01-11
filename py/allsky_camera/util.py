@@ -906,8 +906,16 @@ def ac_catalog(exp, nmp=None, force_mp_centroiding=False):
 
     print('Attempting to flag wrong centroids...')
     t0 = time.time()
-    # put in nmp optional multiprocessing later
-    bsc = flag_wrong_centroids(bsc, bsc)
+    if nmp is None:
+        bsc = flag_wrong_centroids(bsc, bsc)
+    else:
+        p = Pool(nmp)
+        parts = np.array_split(bsc, nmp)
+        args = [(_bsc, bsc) for _bsc in parts]
+        cats = p.starmap(flag_wrong_centroids, args)
+        bsc = pd.concat(cats)
+        p.close()
+        p.join()
     dt = time.time()-t0
     print('flagging wrong centroids took ', '{:.3f}'.format(dt), ' seconds')
 
