@@ -150,7 +150,7 @@ def transpmap_parallel(lon, lat, transp, nside=32, nmp=None):
 
     return map, tot, wt
 
-def _test():
+def _test(nmp=None):
     t0 = time.time()
     size = 2500
     lon = np.random.uniform(low=0, high=360, size=size)
@@ -162,7 +162,7 @@ def _test():
 
     #map, tot, wt = transpmap(lon, lat, transp)
 
-    map, tot, wt = transpmap_parallel(lon, lat, transp, nside=16, nmp=4)
+    map, tot, wt = transpmap_parallel(lon, lat, transp, nside=16, nmp=nmp)
 
     dt = time.time()-t0
     print(dt, ' seconds')
