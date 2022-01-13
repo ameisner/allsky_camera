@@ -956,6 +956,8 @@ def ac_catalog(exp, nmp=None, force_mp_centroiding=False):
 
     bsc = trim_catalog_moon(bsc, exp.mjd)
 
+    bsc['zp_adu_per_s'] = bsc['VMAG'] - bsc['m_inst']
+
     return bsc
 
 def r_pix_to_zd(r_pix):
