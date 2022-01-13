@@ -5,6 +5,57 @@ import astropy.units as u
 from astropy.coordinates import SkyCoord
 import time
 from multiprocessing import Pool
+import pandas as pd
+
+def transpmap_median(lon, lat, transp, nside=8):
+    """
+    Transparency map from median by HEALPix pixel.
+
+    Parameters
+    ----------
+        lon : numpy.ndarray
+            List of longitude data points, in degrees. Must have same
+            number of elements as lat.
+        lat : numpy.ndarray
+            List of latitude data points, in degrees. Must have same
+            number of elements as lon.
+        transp : numpy.ndarray
+            List of transparency values at (lon, lat). Must have same
+            number of elements as lon and lat arrays.
+        nside : int, optional
+            HEALPix nside parameter, default is nside=8.
+
+    Returns
+    -------
+        medians : numpy.ndarray
+            HEALPix transparency map as a 1-dimensional array. NaN for missing data
+            (e.g., regions that are below the horizon).
+        counts : numpy.ndarray
+             HEALPix map of the number of stars per HEALPix pixel. 0 means no stars...
+
+    Notes
+    -----
+        Use ring-order HEALPix convention.
+
+    """
+
+    npix = 12*nside*nside
+
+    ipix = healpy.ang2pix(nside, lon, lat, lonlat=True, nest=False)
+
+    df = pd.DataFrame()
+    df['ipix'] = ipix
+    df['transp'] = transp
+
+    df_med = df.groupby(['ipix'])['transp'].agg(['median', 'count'])
+
+    counts = np.zeros(npix, dtype=int)
+    medians = np.full(npix, np.nan, dtype=float)
+
+    counts[df_med.index] = df_med['count']
+    medians[df_med.index] = df_med['median']
+
+    return medians, counts
 
 def transpmap(lon, lat, transp, nside=32):
     """
@@ -169,3 +220,23 @@ def _test(nmp=None):
 
     healpy.mollview(map)
     plt.show()
+
+def _test_median(nside=8):
+
+    size = 2500
+
+    lon = np.random.uniform(low=0, high=360, size=size)
+    lat = np.random.uniform(low=-90, high=90, size=size)
+    transp = np.random.uniform(low=0, high=1, size=size)
+
+    transp[lon < 180] *= 0.5
+
+    medians, counts = transpmap_median(lon, lat, transp, nside=nside)
+
+    healpy.mollview(counts)
+    plt.show()
+
+    healpy.mollview(medians)
+    plt.show()
+
+    return medians
