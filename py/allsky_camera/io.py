@@ -18,6 +18,7 @@ from pkg_resources import resource_filename
 import copy
 from functools import lru_cache
 from scipy.stats import scoreatpercentile
+import allsky_camera.transpmap as transpmap
 
 @lru_cache()
 def load_static_badpix():
@@ -424,3 +425,54 @@ def oplot_centroids(cat, exp, outdir):
     plt.close()
 
     os.rename(outname_tmp, outname)
+
+def write_healpix(exp, cat, outdir, nside=8):
+    """
+    Write transparency/zeropoint related HEALPix maps.
+
+    Parameters
+    ----------
+        exp : allsky_camera.exposure.AC_exposure
+            All-sky camera exposure object.
+        cat : pandas.core.dataframe.DataFrame
+            Bright star catalog with all-sky camera photometry. Needs to
+            have columns 'x', 'y', 'xcentroid', 'ycentroid'
+        outdir : str
+            Full path of output directory.
+        nside : int, optional
+            HEALPix Nside parameter. Needs to be a valid parameter of 2. The
+            Thinking is that Nside=8 or Nside=4 would be the best choices.
+
+    Notes
+    -----
+        Add checks on HEALPix Nside provided?
+
+    """
+
+    # create the HEALPix map(s)
+    # figure out the output name
+    # write it out as either single or multi extension FITS
+
+    print('Making HEALPix maps...')
+
+    zp_map_hor, zp_counts_hor = transpmap.healmap_median(cat['az_deg'],
+                                                         cat['alt_deg'],
+                                                         cat['zp_adu_per_s'],
+                                                         nside=nside)
+
+    zp_map_equ, zp_counts_equ = transpmap.healmap_median(cat['RA'],
+                                                         cat['DEC'],
+                                                         cat['zp_adu_per_s'],
+                                                         nside=nside)
+
+    # need a utility function that creates the hdus from the data?
+
+    # header metadata
+    hdu_zp_hor = fits.PrimaryHDU(data=zp_map_hor)
+    hdu_zp_counts = fits.ImageHDU(data=zp_counts_hor)
+
+    hdul = [hdu_zp_hor, hdu_zp_counts]
+
+    hdul = fits.HDUList(hdul)
+
+    hdul.writeto('healpix.fits')
