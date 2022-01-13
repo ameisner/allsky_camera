@@ -7,9 +7,9 @@ import time
 from multiprocessing import Pool
 import pandas as pd
 
-def transpmap_median(lon, lat, transp, nside=8):
+def healmap_median(lon, lat, vals, nside=8):
     """
-    Transparency map from median by HEALPix pixel.
+    Median by HEALPix pixel for a list of values at a list of sky locations.
 
     Parameters
     ----------
@@ -19,16 +19,16 @@ def transpmap_median(lon, lat, transp, nside=8):
         lat : numpy.ndarray
             List of latitude data points, in degrees. Must have same
             number of elements as lon.
-        transp : numpy.ndarray
-            List of transparency values at (lon, lat). Must have same
-            number of elements as lon and lat arrays.
+        vals : numpy.ndarray
+            List of values (e.g., transparency, zeropoint, ...) at (lon, lat). Must have same
+            number of elements as lon and lat arrays. Values assumed to be of type float.
         nside : int, optional
             HEALPix nside parameter, default is nside=8.
 
     Returns
     -------
         medians : numpy.ndarray
-            HEALPix transparency map as a 1-dimensional array. NaN for missing data
+            HEALPix median map as a 1-dimensional array. NaN for missing data
             (e.g., regions that are below the horizon).
         counts : numpy.ndarray
              HEALPix map of the number of stars per HEALPix pixel. 0 means no stars...
@@ -45,9 +45,9 @@ def transpmap_median(lon, lat, transp, nside=8):
 
     df = pd.DataFrame()
     df['ipix'] = ipix
-    df['transp'] = transp
+    df['vals'] = vals
 
-    df_med = df.groupby(['ipix'])['transp'].agg(['median', 'count'])
+    df_med = df.groupby(['ipix'])['vals'].agg(['median', 'count'])
 
     counts = np.zeros(npix, dtype=int)
     medians = np.full(npix, np.nan, dtype=float)
@@ -231,7 +231,7 @@ def _test_median(nside=8):
 
     transp[lon < 180] *= 0.5
 
-    medians, counts = transpmap_median(lon, lat, transp, nside=nside)
+    medians, counts = healmap_median(lon, lat, transp, nside=nside)
 
     healpy.mollview(counts)
     plt.show()
