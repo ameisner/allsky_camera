@@ -501,6 +501,8 @@ def write_healpix(exp, cat, outdir, nside=8):
 
     print('Making HEALPix maps...')
 
+    par = common.ac_params()
+
     zp_map_hor, zp_counts_hor = transpmap.healmap_median(cat['az_deg'],
                                                          cat['alt_deg'],
                                                          cat['zp_adu_per_s'],
@@ -511,14 +513,23 @@ def write_healpix(exp, cat, outdir, nside=8):
                                                          cat['zp_adu_per_s'],
                                                          nside=nside)
 
+    transp_map_hor = np.power(10, -(par['zp_adu_per_s'] - zp_map_hor)/2.5)
+    transp_map_equ = np.power(10, -(par['zp_adu_per_s'] - zp_map_equ)/2.5)
+
+
     hdu_zp_hor = fits.PrimaryHDU(data=zp_map_hor)
     hdu_counts_hor = fits.ImageHDU(data=zp_counts_hor)
 
     hdu_zp_equ = fits.ImageHDU(data=zp_map_equ)
     hdu_counts_equ = fits.ImageHDU(data=zp_counts_equ)
 
-    hdul = [hdu_zp_hor, hdu_counts_hor, hdu_zp_equ, hdu_counts_equ]
-    extnames = ['ZP_HOR', 'N_ZP_HOR', 'ZP_EQU', 'N_ZP_EQU']
+    hdu_transp_hor = fits.ImageHDU(data=transp_map_hor)
+    hdu_transp_equ = fits.ImageHDU(data=transp_map_equ)
+
+    hdul = [hdu_zp_hor, hdu_counts_hor, hdu_zp_equ, hdu_counts_equ,
+            hdu_transp_hor, hdu_transp_equ]
+    extnames = ['ZP_HOR', 'N_ZP_HOR', 'ZP_EQU', 'N_ZP_EQU',
+                'TRANSP_HOR', 'TRANSP_EQU']
 
     for hdu, extname in zip(hdul, extnames):
         coordsys = 'EQU' if 'EQU' in extname else 'HOR'
