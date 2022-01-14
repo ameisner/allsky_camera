@@ -527,5 +527,17 @@ def write_healpix(exp, cat, outdir, nside=8):
 
     hdul = fits.HDUList(hdul)
 
-    # figure out the output name, and do the atomic writing sequence too
-    hdul.writeto('healpix.fits')
+    basename = (os.path.split(exp.fname_im))[-1]
+
+    outname = basename.replace('.fits', '-healpix.fits')
+
+    outname = os.path.join(outdir, outname)
+
+    outname_tmp = outname + '.tmp'
+
+    assert(not os.path.exists(outname))
+    assert(not os.path.exists(outname_tmp))
+
+    hdul.writeto(outname_tmp)
+
+    os.rename(outname_tmp, outname)
