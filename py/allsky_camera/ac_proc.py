@@ -16,6 +16,13 @@ import allsky_camera.util as util
 import allsky_camera.io as io
 import multiprocessing
 
+if ('HOSTNAME' in os.environ) and ('cori' in os.environ['HOSTNAME']):
+    try:
+        import desiutil.iers
+        desiutil.iers.freeze_iers()
+    except:
+        print('desiutil not available?')
+
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
             write_sbmap=False, force_mp_centroiding=False,
