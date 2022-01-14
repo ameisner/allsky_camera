@@ -426,7 +426,7 @@ def oplot_centroids(cat, exp, outdir):
 
     os.rename(outname_tmp, outname)
 
-def _add_healpix_header_cards(h, nside, extname=None):
+def _add_healpix_header_cards(h, nside, extname=None, coordsys=None):
     """
     Add standard HEALPix header cards to a FITS header.
 
@@ -440,6 +440,10 @@ def _add_healpix_header_cards(h, nside, extname=None):
         extname : str, optional
             Extension name. If None (default) then no EXTNAME keyword will
             be added.
+        coordsys : str, optional
+            Coordinate system (either EQU for equatorial or HOR for
+            horizontal). Default is None. If specified, will go into the
+            COORDSYS header card.
 
     Notes
     -----
@@ -468,6 +472,9 @@ def _add_healpix_header_cards(h, nside, extname=None):
 
     if extname is not None:
         h['EXTNAME'] = extname
+
+    if coordsys is not None:
+        h['COORDSYS'] = (coordsys, 'HEALPix coordinate system')
 
 def write_healpix(exp, cat, outdir, nside=8):
     """
@@ -514,7 +521,9 @@ def write_healpix(exp, cat, outdir, nside=8):
     extnames = ['ZP_HOR', 'N_ZP_HOR', 'ZP_EQU', 'N_ZP_EQU']
 
     for hdu, extname in zip(hdul, extnames):
-        _add_healpix_header_cards(hdu.header, nside, extname=extname)
+        coordsys = 'EQU' if 'EQU' in extname else 'HOR'
+        _add_healpix_header_cards(hdu.header, nside, extname=extname,
+                                  coordsys=coordsys)
 
     hdul = fits.HDUList(hdul)
 
