@@ -1,3 +1,10 @@
+"""
+allsky_camera.transpmap
+====================
+
+HEALPix map-making utilities.
+"""
+
 import healpy
 import numpy as np
 import matplotlib.pyplot as plt
