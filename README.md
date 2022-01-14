@@ -32,6 +32,12 @@ The list of outputs produced is:
 * The -detrended.fits output is a detrended version of the raw all-sky camera image.
 * The -zp.png output is a checkplot showing the all-sky camera photometry and corresponding zeropoint measurement.
 
+Additional output files are also possible via invocation of certain command line options:
+
+* setting `--write_sbmap` will write the surface brightness map as a FITS image with suffix `-sbmap.fits`.
+* setting `--oplot_centroids` will create an image rendering with suffix `-detrended.png`.
+* setting `--write_healpix` will write HEALPix maps of the photometric zeropoint to a FITS image with suffix `-healpix.fits`.
+
 # full help for running the pipeline
 
     allsky_camera/py/allsky_camera> python ac_proc.py --help
