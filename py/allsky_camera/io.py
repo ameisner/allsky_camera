@@ -469,7 +469,12 @@ def write_healpix(exp, cat, outdir, nside=8):
 
     # header metadata
     hdu_zp_hor = fits.PrimaryHDU(data=zp_map_hor)
+    hdu_zp_hor.header['NSIDE'] = nside
+    hdu_zp_hor.header['ORDER'] = 'RING'
+
     hdu_zp_counts = fits.ImageHDU(data=zp_counts_hor)
+    hdu_zp_counts.header['NSIDE'] = nside
+    hdu_zp_counts.header['ORDER'] = 'RING'
 
     hdul = [hdu_zp_hor, hdu_zp_counts]
 

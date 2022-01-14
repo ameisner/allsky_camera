@@ -19,7 +19,8 @@ import multiprocessing
 def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
             write_sbmap=False, force_mp_centroiding=False,
-            dont_write_catalog=False, oplot_centroids=False):
+            dont_write_catalog=False, oplot_centroids=False,
+            write_healpix=False):
     """
     Process one all-sky camera image.
 
@@ -58,6 +59,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         oplot_centroids : bool, optional
             Set True to make and write out a checkplot overlaying bright
             star centroids on the detrended image.
+        write_healpix : bool, optional
+            Set True to write a low-res HEALPix map of the photometric
+            zeropoint, ultimately for use by DESI survey planning.
 
     Notes
     -----
@@ -107,6 +111,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         if write_sbmap:
             io.write_sbmap(exp, sbmap, outdir)
 
+        if write_healpix:
+            io.write_healpix(exp, bsc, outdir)
+            
         if not skip_checkplots:
             io.zp_checkplot(bsc, exp, outdir)
             io.centroid_quiver_plot(bsc, exp, outdir)
@@ -121,7 +128,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
           ' seconds')
     print('all-sky camera reduction pipeline completed at: ' +
           str(datetime.utcnow()) + ' UTC')
-    
+
 if __name__ == "__main__":
     descr = 'run the all-sky camera reduction pipeline on an exposure'
 
@@ -163,6 +170,9 @@ if __name__ == "__main__":
     parser.add_argument('--oplot_centroids', default=False,
                         action='store_true',
                         help="checkplot overlaying centroids on detrended image")
+    parser.add_argument('--write_healpix', default=False,
+                        action='store_true',
+                        help="write HEALPix map of photometric zeropoint")
 
     args = parser.parse_args()
 
@@ -172,4 +182,5 @@ if __name__ == "__main__":
             skip_sbmap=args.skip_sbmap, write_sbmap=args.write_sbmap,
             force_mp_centroiding=args.force_mp_centroiding,
             dont_write_catalog=args.dont_write_catalog,
-            oplot_centroids=args.oplot_centroids)
+            oplot_centroids=args.oplot_centroids,
+            write_healpix=args.write_healpix)
