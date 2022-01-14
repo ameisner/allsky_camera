@@ -426,6 +426,49 @@ def oplot_centroids(cat, exp, outdir):
 
     os.rename(outname_tmp, outname)
 
+def _add_healpix_header_cards(h, nside, extname=None):
+    """
+    Add standard HEALPix header cards to a FITS header.
+
+    Parameters
+    ----------
+        h : astropy.io.fits.header.Header
+            FITS header object. Will be modified via the addition of
+            additional header cards and their corresponding comments.
+        nside : int
+            HEALPix Nside value that will be added to the header.
+        extname : str, optional
+            Extension name. If None (default) then no EXTNAME keyword will
+            be added.
+
+    Notes
+    -----
+        Example of what this function is aiming for:
+
+        PIXTYPE = 'HEALPIX '           / Pixel algorithm
+        ORDERING= 'RING    '           / Ordering scheme
+        NSIDE   =                    8 / Resolution parameter
+        NPIX    =                  768 / # of pixels
+        FIRSTPIX=                    0 / First pixel (0 based)
+        LASTPIX =                  767 / Last pixel (0 based)
+
+        Should probably add something like BUNIT to specify the units of
+        each extension...
+
+    """
+
+    npix = 12*nside*nside
+
+    h['PIXTYPE'] = ('HEALPIX', 'Pixel algorithm')
+    h['ORDERING'] = ('RING', 'Ordering scheme')
+    h['NSIDE'] = (nside, 'Resolution parameter')
+    h['NPIX'] = (npix, '# of pixels')
+    h['FIRSTPIX'] = (0, 'First pixel (0 based)')
+    h['LASTPIX'] = (npix-1, 'Last pixel (0 based)')
+
+    if extname is not None:
+        h['EXTNAME'] = extname
+
 def write_healpix(exp, cat, outdir, nside=8):
     """
     Write transparency/zeropoint related HEALPix maps.
@@ -449,10 +492,6 @@ def write_healpix(exp, cat, outdir, nside=8):
 
     """
 
-    # create the HEALPix map(s)
-    # figure out the output name
-    # write it out as either single or multi extension FITS
-
     print('Making HEALPix maps...')
 
     zp_map_hor, zp_counts_hor = transpmap.healmap_median(cat['az_deg'],
@@ -465,27 +504,19 @@ def write_healpix(exp, cat, outdir, nside=8):
                                                          cat['zp_adu_per_s'],
                                                          nside=nside)
 
-    # need a utility function that creates the hdus from the data?
-
-    # header metadata
     hdu_zp_hor = fits.PrimaryHDU(data=zp_map_hor)
-    hdu_zp_hor.header['NSIDE'] = nside
-    hdu_zp_hor.header['ORDER'] = 'RING'
-
     hdu_counts_hor = fits.ImageHDU(data=zp_counts_hor)
-    hdu_counts_hor.header['NSIDE'] = nside
-    hdu_counts_hor.header['ORDER'] = 'RING'
 
     hdu_zp_equ = fits.ImageHDU(data=zp_map_equ)
-    hdu_zp_equ.header['NSIDE'] = nside
-    hdu_zp_equ.header['ORDER'] = 'RING'
-
     hdu_counts_equ = fits.ImageHDU(data=zp_counts_equ)
-    hdu_counts_equ.header['NSIDE'] = nside
-    hdu_counts_equ.header['ORDER'] = 'RING'
 
     hdul = [hdu_zp_hor, hdu_counts_hor, hdu_zp_equ, hdu_counts_equ]
+    extnames = ['ZP_HOR', 'N_ZP_HOR', 'ZP_EQU', 'N_ZP_EQU']
+
+    for hdu, extname in zip(hdul, extnames):
+        _add_healpix_header_cards(hdu.header, nside, extname=extname)
 
     hdul = fits.HDUList(hdul)
 
+    # figure out the output name, and do the atomic writing sequence too
     hdul.writeto('healpix.fits')
