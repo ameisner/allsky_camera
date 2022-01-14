@@ -472,11 +472,19 @@ def write_healpix(exp, cat, outdir, nside=8):
     hdu_zp_hor.header['NSIDE'] = nside
     hdu_zp_hor.header['ORDER'] = 'RING'
 
-    hdu_zp_counts = fits.ImageHDU(data=zp_counts_hor)
-    hdu_zp_counts.header['NSIDE'] = nside
-    hdu_zp_counts.header['ORDER'] = 'RING'
+    hdu_counts_hor = fits.ImageHDU(data=zp_counts_hor)
+    hdu_counts_hor.header['NSIDE'] = nside
+    hdu_counts_hor.header['ORDER'] = 'RING'
 
-    hdul = [hdu_zp_hor, hdu_zp_counts]
+    hdu_zp_equ = fits.ImageHDU(data=zp_map_equ)
+    hdu_zp_equ.header['NSIDE'] = nside
+    hdu_zp_equ.header['ORDER'] = 'RING'
+
+    hdu_counts_equ = fits.ImageHDU(data=zp_counts_equ)
+    hdu_counts_equ.header['NSIDE'] = nside
+    hdu_counts_equ.header['ORDER'] = 'RING'
+
+    hdul = [hdu_zp_hor, hdu_counts_hor, hdu_zp_equ, hdu_counts_equ]
 
     hdul = fits.HDUList(hdul)
 
