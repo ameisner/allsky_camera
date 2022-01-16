@@ -15,6 +15,7 @@ from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
 import multiprocessing
+import allsky_camera.satellites as satellites
 
 if ('HOSTNAME' in os.environ) and ('cori' in os.environ['HOSTNAME']):
     try:
@@ -27,7 +28,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
             nmp=None, skip_checkplots=False, skip_sbmap=False,
             write_sbmap=False, force_mp_centroiding=False,
             dont_write_catalog=False, oplot_centroids=False,
-            write_healpix=False):
+            write_healpix=False, detect_streaks=False):
     """
     Process one all-sky camera image.
 
@@ -69,6 +70,10 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
         write_healpix : bool, optional
             Set True to write a low-res HEALPix map of the photometric
             zeropoint, ultimately for use by DESI survey planning.
+        detect_streaks : bool, optional
+            If True, run satellite streak detection. At present, running
+            streak detection will also require the astride streak
+            detection package to be installed.
 
     Notes
     -----
@@ -100,6 +105,9 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
     bsc = util.ac_catalog(exp, nmp=nmp, force_mp_centroiding=force_mp_centroiding)
 
+    if detect_streaks:
+        streaks = satellites.detect_streaks(exp)
+
     if not skip_sbmap:
         sbmap = util.sky_brightness_map(exp.detrended, exp.time_seconds, nmp=nmp)
 
@@ -120,7 +128,10 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
 
         if write_healpix:
             io.write_healpix(exp, bsc, outdir)
-            
+
+        if detect_streaks:
+            io.write_streaks(exp, streaks, outdir)
+
         if not skip_checkplots:
             io.zp_checkplot(bsc, exp, outdir)
             io.centroid_quiver_plot(bsc, exp, outdir)
@@ -177,9 +188,14 @@ if __name__ == "__main__":
     parser.add_argument('--oplot_centroids', default=False,
                         action='store_true',
                         help="checkplot overlaying centroids on detrended image")
+
     parser.add_argument('--write_healpix', default=False,
                         action='store_true',
                         help="write HEALPix map of photometric zeropoint")
+
+    parser.add_argument('--detect_streaks', default=False,
+                        action='store_true',
+                        help="run satellite streak detection/cataloging")
 
     args = parser.parse_args()
 
@@ -190,4 +206,5 @@ if __name__ == "__main__":
             force_mp_centroiding=args.force_mp_centroiding,
             dont_write_catalog=args.dont_write_catalog,
             oplot_centroids=args.oplot_centroids,
-            write_healpix=args.write_healpix)
+            write_healpix=args.write_healpix,
+            detect_streaks=args.detect_streaks)
