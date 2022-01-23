@@ -37,12 +37,13 @@ Additional output files are also possible via invocation of certain command line
 * setting `--write_sbmap` will write the surface brightness map as a FITS image with suffix `-sbmap.fits`.
 * setting `--oplot_centroids` will create an image rendering with suffix `-detrended.png`.
 * setting `--write_healpix` will write HEALPix maps of the photometric zeropoint to a FITS image with suffix `-healpix.fits`.
+* setting `--detect_streaks` will write out the list of detected streaks (if any) to a Pickle file with suffix `-streaks.pkl`.
 
 # full help for running the pipeline
 
     allsky_camera/py/allsky_camera> python ac_proc.py --help
     usage: ac_proc.py [-h] [--outdir OUTDIR] [--dont_write_detrended] [--multiproc MULTIPROC] [--skip_checkplots] [--skip_sbmap] [--write_sbmap] [--force_mp_centroiding]
-                      [--dont_write_catalog] [--oplot_centroids] [--write_healpix]
+                      [--dont_write_catalog] [--oplot_centroids] [--write_healpix] [--detect_streaks]
                       fname_in
 
     run the all-sky camera reduction pipeline on an exposure
@@ -65,3 +66,4 @@ Additional output files are also possible via invocation of certain command line
       --dont_write_catalog  don't write source catalog FITS file
       --oplot_centroids     checkplot overlaying centroids on detrended image
       --write_healpix       write HEALPix map of photometric zeropoint
+      --detect_streaks      run satellite streak detection/cataloging
