@@ -15,7 +15,6 @@ from allsky_camera.exposure import AC_exposure
 import allsky_camera.util as util
 import allsky_camera.io as io
 import multiprocessing
-import allsky_camera.satellites as satellites
 
 if ('HOSTNAME' in os.environ) and ('cori' in os.environ['HOSTNAME']):
     try:
@@ -106,6 +105,7 @@ def ac_proc(fname_in, outdir=None, dont_write_detrended=False,
     bsc = util.ac_catalog(exp, nmp=nmp, force_mp_centroiding=force_mp_centroiding)
 
     if detect_streaks:
+        import allsky_camera.satellites as satellites
         streaks = satellites.detect_streaks(exp)
 
     if not skip_sbmap:
